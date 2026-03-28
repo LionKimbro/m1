@@ -1,0 +1,41 @@
+{
+  "document": {
+    "document-id": "m1lattice.semantic-examination",
+    "title": "M1 Lattice: Semantic Examination",
+    "purpose": "Describes the conceptual roles of common entity fields, framing them as dimensions of meaning such as identity, classification, explanation, history, and attention."
+  },
+  "overview": "An entity in the M1 Lattice is not just a collection of fields, but a structured presence that can be understood along multiple semantic dimensions. These dimensions help guide both human understanding and system design.",
+  "semantic_dimensions": [
+    {
+      "dimension": "identity",
+      "traditional_field": "id",
+      "description": "What the entity is, in a stable and referential sense. Identity is persistent and does not change over time."
+    },
+    {
+      "dimension": "classification",
+      "traditional_field": "tags",
+      "description": "How the entity is grouped or categorized. Classification is flexible and may evolve."
+    },
+    {
+      "dimension": "explanation",
+      "traditional_field": "description",
+      "description": "What the entity means. Provides context, interpretation, and understanding."
+    },
+    {
+      "dimension": "history",
+      "traditional_field": "log",
+      "description": "What has happened to the entity over time. Captures events, changes, and provenance."
+    },
+    {
+      "dimension": "attention",
+      "traditional_field": "hook",
+      "description": "What draws attention to the entity. A concise, engaging expression that invites interaction or conveys significance quickly."
+    }
+  ],
+  "notes": [
+    "These dimensions are not required fields, but lenses through which entities can be understood.",
+    "Multiple fields or structures may contribute to a single semantic dimension.",
+    "Not all entities must express all dimensions.",
+    "These dimensions support both human cognition and system design."
+  ]
+}

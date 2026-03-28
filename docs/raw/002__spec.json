@@ -1,0 +1,99 @@
+{
+  "document": {
+    "document-id": "m1lattice.spec.core",
+    "title": "M1 Lattice: Core Specification",
+    "purpose": "Defines the structure and behavior of entities, links, aspects, and tables in the M1 Lattice system."
+  },
+  "entities": {
+    "identity": {
+      "description": "Each entity must have at least one stable identifier.",
+      "fields": {
+        "guid": { "type": "string", "required": false },
+        "tag_uri": { "type": "string", "required": false }
+      },
+      "rules": [
+        "At least one identifier must be present",
+        "Identifiers should be globally unique",
+        "Identifiers are immutable once assigned"
+      ]
+    },
+    "core_fields": {
+      "name": { "type": "string", "required": false },
+      "title": { "type": "string", "required": false },
+      "description": { "type": "string", "required": false },
+      "tags": { "type": "array", "required": false },
+      "url": { "type": "string", "required": false },
+      "image": { "type": "string", "required": false },
+      "notes": { "type": "string", "required": false },
+      "log": { "type": "array", "required": false },
+      "hook": { "type": "string", "required": false }
+    },
+    "mutability": {
+      "identity": "immutable",
+      "other_fields": "mutable"
+    }
+  },
+  "links": {
+    "structure": {
+      "from": { "type": "entity-id", "required": true },
+      "to": { "type": "entity-id", "required": true },
+      "type": { "type": "string", "required": false },
+      "direction": { "type": "string", "enum": ["uni", "bi"], "required": false }
+    },
+    "rules": [
+      "Links may be stored independently of entities",
+      "Links may be promoted to full entities"
+    ]
+  },
+  "aspects": {
+    "structure": {
+      "entity_id": { "type": "entity-id", "required": true },
+      "aspect_type": { "type": "string", "required": true },
+      "data": { "type": "object", "required": true }
+    },
+    "rules": [
+      "Entities may have zero or more aspects",
+      "Multiple aspects of the same type may be allowed",
+      "Aspects should be independently stored and retrievable"
+    ]
+  },
+  "tables": {
+    "description": "Maps identifiers to resource locations.",
+    "structure": {
+      "entity_id": { "type": "entity-id", "required": true },
+      "locations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "fields": {
+            "type": { "type": "string", "example": ["file", "url"] },
+            "path": { "type": "string", "required": false },
+            "value": { "type": "string", "required": false }
+          }
+        }
+      }
+    },
+    "rules": [
+      "Tables may contain multiple locations per entity",
+      "Systems should resolve using available sources",
+      "Tables may be distributed and merged"
+    ]
+  },
+  "storage_model": {
+    "rules": [
+      "Entities, links, aspects, and tables may be stored separately",
+      "Systems must not assume co-location",
+      "Systems should support partial knowledge"
+    ]
+  },
+  "interoperability": {
+    "description": "Systems interoperate via shared identifiers.",
+    "requirement": "No shared schema required beyond identity conventions"
+  },
+  "minimal_compliance": [
+    "Recognizes entity identity",
+    "Resolves entity references",
+    "Processes links",
+    "Reads or attaches aspects"
+  ]
+}

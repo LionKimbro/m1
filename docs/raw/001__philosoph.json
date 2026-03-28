@@ -1,0 +1,65 @@
+{
+  "document": {
+    "document-id": "m1lattice.philosophy",
+    "tags": ["m1", "lattice", "m1lattice", "philosophy"],
+    "title": "M1 Lattice: Philosophy and Direction",
+    "purpose": "Conceptual foundation of the M1 Lattice system, describing entities, links, aspects, and tables as a distributed identity-centered data model."
+  },
+  "core_idea": "The M1 Lattice is a model of data in which identity is primary, and all structure emerges from relationships between independently existing entities. Rather than rigid hierarchies or tightly coupled schemas, the system forms a lattice of entities connected by links and enriched by aspects.",
+  "entities": {
+    "description": "An entity is a uniquely identifiable unit of existence within the system.",
+    "identity": "Defined by stable identifiers such as GUID, tag URI, or equivalent.",
+    "properties": "All other properties are optional and attachable, not intrinsic.",
+    "characteristics": [
+      "independently creatable",
+      "independently discoverable",
+      "extensible without modifying original structure"
+    ]
+  },
+  "links": {
+    "description": "Links express relationships between entities.",
+    "properties": [
+      "directional or bidirectional",
+      "typed or untyped",
+      "first-class (may themselves be entities)"
+    ],
+    "purpose": "Allow structure to emerge organically without enforcing hierarchy."
+  },
+  "aspects": {
+    "description": "Modular extensions attached to entities.",
+    "inspiration": "Entity-Component Systems (ECS)",
+    "properties": [
+      "add structured data or behavior",
+      "attachable and removable independently",
+      "enable participation in multiple conceptual systems"
+    ]
+  },
+  "tables": {
+    "description": "Mappings between identifiers and resource locations.",
+    "purpose": [
+      "resolve entity IDs to file paths",
+      "resolve entity IDs to URLs",
+      "bridge abstract identity and concrete storage"
+    ]
+  },
+  "lattice_nature": {
+    "description": "The system forms a lattice rather than a hierarchy.",
+    "properties": [
+      "no single root",
+      "multiple overlapping structures",
+      "partial ordering instead of strict hierarchy"
+    ],
+    "implications": [
+      "decentralized growth",
+      "flexible recombination",
+      "resilience to change"
+    ]
+  },
+  "design_principles": [
+    "Identity is stable; structure is fluid.",
+    "Links exist independently of the entities they connect.",
+    "Aspects describe independent dimensions of the data.",
+    "Data formats do not matter; they can always be translated."
+  ],
+  "vision": "A distributed data universe where any object can be referenced universally, systems interoperate through shared identity, and structure emerges from use rather than prescription."
+}
