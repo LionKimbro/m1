@@ -10,11 +10,13 @@
     "threads": {
       "M1-DESIGN": "Philosophy and specification development",
       "M1-CMD": "Execution, tracking, and progress management (this document)",
+      "M1-FMT": "Detailed design of Entity, Link, Aspect, Table",
       "M1-*": "Task-specific or topic-specific work threads"
     },
     "paths": {
       "M1-DESIGN": "https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f",
-      "M1-CMD": "https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9"
+      "M1-CMD": "https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9",
+      "M1-FMT": "https://chatgpt.com/c/69c80ea8-d290-83e8-a4ee-29ad24e465e6"
     },
     "principle": "Separate design from execution. This document reflects what is, what is incomplete, and what comes next."
   },
