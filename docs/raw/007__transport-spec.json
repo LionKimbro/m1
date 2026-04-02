@@ -30,6 +30,32 @@
             "required": true,
             "example": "1.0",
             "description": "Specifies the version of the M1 transport format."
+          },
+          "created": {
+            "type": "string",
+            "required": false,
+            "description": "Timestamp indicating when this transport unit was created. Intended for provenance and file-level context.",
+            "format": "ISO 8601 datetime"
+          },
+          "author": {
+            "type": "string",
+            "required": false,
+            "description": "A human-readable indication of who created or contributed this transport unit. No formal structure or identifier is required."
+          },
+          "title": {
+            "type": "string",
+            "required": false,
+            "description": "A human-readable title for the transport unit, suitable for display in file browsers or user interfaces."
+          },
+          "description": {
+            "type": "string",
+            "required": false,
+            "description": "A textual description of the transport unit, providing context about its contents or purpose."
+          },
+          "hook": {
+            "type": "string",
+            "required": false,
+            "description": "A concise, attention-directing phrase intended to quickly convey the significance or purpose of the transport unit."
           }
         }
       },

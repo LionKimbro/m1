@@ -2,14 +2,10 @@
   "document": {
     "document-id": "m1lattice.status",
     "title": "M1 Lattice — Status and Progress Tracking",
-    "tags": [
-      "m1",
-      "status",
-      "tracking",
-      "command-center"
-    ],
+    "tags": ["m1", "status", "tracking", "command-center"],
     "purpose": "Provide a clear, continuously updated map of the current state of the M1 system, including component status, infrastructure readiness, interface development, and next required actions. This document is the execution-facing mirror of progress."
   },
+
   "context": {
     "threads": {
       "M1-DESIGN": "Philosophy and specification development",
@@ -22,6 +18,7 @@
     },
     "principle": "Separate design from execution. This document reflects what is, what is incomplete, and what comes next."
   },
+
   "status_map": {
     "core_documents": {
       "001__philosophy.json": {
@@ -31,8 +28,8 @@
       },
       "002__spec.json": {
         "id": "m1lattice.spec.core",
-        "status": "active",
-        "notes": "Primary focus. Core data structures and rules are being clarified and corrected."
+        "status": "stabilized",
+        "notes": "Core data model (Entities, Links, Aspects, Tables) is complete and internally consistent."
       },
       "003__semantic-examination.json": {
         "id": "m1lattice.semantic-examination",
@@ -45,6 +42,7 @@
         "notes": "Clear, continuously updated map of the current state of the M1 system."
       }
     },
+
     "model_components": {
       "core_identity": {
         "status": "stabilized",
@@ -55,22 +53,23 @@
         "notes": "Entity structure is well defined."
       },
       "links": {
-        "status": "concept-clear",
-        "notes": "Strong conceptual clarity; needs formal written specification."
+        "status": "stabilized",
+        "notes": "Links defined as first-class relational entities."
       },
       "aspects": {
-        "status": "concept-defined",
-        "notes": "Concept established; structure and constraints not yet formalized."
+        "status": "stabilized",
+        "notes": "Aspects defined as structured, typed perspectives."
       },
       "tables": {
-        "status": "introduced",
-        "notes": "Present as idea and partial structure; not yet formalized."
+        "status": "stabilized",
+        "notes": "Tables defined as identifier → location resolution layer."
       }
     },
+
     "infrastructure": {
-      "object_storage_format": {
-        "status": "missing",
-        "notes": "Transport layer not yet defined. Critical for persistence and interchange."
+      "transport_object_storage": {
+        "status": "concept-defined",
+        "notes": "Non-authoritative, identity-merged distributed graph model defined; ready for concrete file implementation."
       },
       "guid_and_tag_uri": {
         "status": "mostly-solved",
@@ -81,6 +80,7 @@
         "notes": "Operational understanding exists; requires formal specification."
       }
     },
+
     "interface": {
       "object_browser": {
         "status": "not-built",
@@ -92,36 +92,40 @@
       }
     }
   },
+
   "active_focus": {
-    "primary": "Advance and stabilize m1lattice.spec.core",
+    "primary": "Implement transport and loader for M1",
     "supporting": [
-      "Stabilize Link",
-      "Stabilize Aspect",
-      "Stabilize Table"
+      "Create first M1 transport file",
+      "Implement minimal in-memory loader",
+      "Define initial API surface for entity, aspect, and link access"
     ]
   },
+
   "next_steps": [
     {
       "priority": 1,
-      "action": "Resolve m1lattice.spec.core Link, Aspect, and Table",
-      "result": "Stable definitions for all core parts"
+      "action": "Create first concrete M1 transport file",
+      "result": "Validated file structure and header format"
     },
     {
       "priority": 2,
-      "action": "Define the transport/object storage format -- system metadata, file typing, and containment.",
-      "result": "Foundation for persistence and system interoperability"
+      "action": "Implement minimal loader producing identity-merged in-memory view",
+      "result": "Executable system capable of reading M1 data"
     },
     {
       "priority": 3,
-      "action": "Outline how the data will be interacted with in-process: functions, data structures, ingestion and returning back to disk."
+      "action": "Implement initial API (core, aspect, links_to/from, resource)",
+      "result": "Usable interface for interacting with M1 data"
     }
   ],
-  "next-action": "Define minimal Link JSON structure",
+
+  "next-action": "Create first real M1 transport file",
+
   "rules": [
     "This document reflects reality, not intention.",
     "Statuses must be updated as work progresses.",
     "Do not expand scope during execution cycles.",
-    "Keep focus on spec.core until stabilized.",
     "Clarity over completeness."
   ]
 }
