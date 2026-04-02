@@ -1,0 +1,20 @@
+title: Envisioned API (Python-focal) for use with M1
+date: 2026-04-01
+
+* core("<identifier>") --> core Entity data
+* aspects("<identifier>")  -> ["<aspect-type-identifier>", ...]
+* aspect("<identifier>", "<aspect-type-identifier>") --> Aspect data for entity
+* links("<relationship-type>", "<identifier>" -> ["<identifier>", ...]
+* links_to("<relationship-type>", "<identifier>") -> ["<identifier>", ...]
+* links_from("<relationship-type>", "<identifier>") -> ["<identifier>", ...]
+* resource("<resource-id>") -> pathlib.Path object, or (?) for URLs
+
+It's also conceivable to me that we might want a form:
+* assembly("<identifier>") --> {<complex assembly data>}
+
+<complex assembly data> = 
+  {"core": {...},
+   "aspects": {"...": {...}, ...}
+   "links": {"to": [{<link>}, ...],
+             "from": [{<link>}, ...]}}
+

@@ -1,0 +1,24 @@
+title: Conversations involved in making M1
+date: 2026-04-01
+
+
+== Main Conversations ==
+date: 2026-04-01
+
+M1-CMD (Project Tracking):
+  https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9
+
+M1-DESIGN (primary design thread):
+  https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f
+
+M1-FMT (core format development):
+  - the development of 002__spec.json,
+    which includes the definition of Entity, Aspect, Link, and Table
+  https://chatgpt.com/c/69c80ea8-d290-83e8-a4ee-29ad24e465e6
+
+
+== General Conversations ==
+date: 2026-04-01
+
+Investigating the use of "polar" for M1:
+  https://chatgpt.com/c/69cc681e-5ad0-83e8-9283-177b6e1e277f

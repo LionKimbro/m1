@@ -1,0 +1,150 @@
+{
+  "document": {
+    "document-id": "m1lattice.spec.transport",
+    "title": "M1 Lattice: Transport Specification",
+    "version": "1.0",
+    "status": "draft",
+    "purpose": "Defines the transport and object storage model for M1 Lattice data, including file-level semantics, composition rules, identity resolution, and loading behavior.",
+    "references": [
+      "m1lattice.spec.core"
+    ]
+  },
+  "overview": "The M1 transport model defines how M1 data is represented, stored, and exchanged between systems. Transport units are designed as composable fragments of a global identity-merged graph. Files do not represent closed datasets or authoritative sources, but instead contribute knowledge to a shared, distributed structure.",
+  "core_principles": [
+    "M1 is a non-authoritative, identity-merged distributed graph.",
+    "Transport units contribute knowledge; they do not define ownership or completeness.",
+    "All data is merged into a single conceptual global graph via identity.",
+    "Identity is authoritative; all other data is subject to merge rules.",
+    "Systems must support partial, incomplete, and distributed data."
+  ],
+  "transport_unit": {
+    "description": "The fundamental unit of transport is a file containing a collection of M1 objects. Each file is a fragment of the global graph and may contain any combination of entities, links, aspects, and tables.",
+    "structure": {
+      "m1": {
+        "type": "object",
+        "required": true,
+        "description": "Header identifying the file as M1 transport data.",
+        "fields": {
+          "version": {
+            "type": "string",
+            "required": true,
+            "example": "1.0",
+            "description": "Specifies the version of the M1 transport format."
+          }
+        }
+      },
+      "entities": {
+        "type": "array",
+        "required": false,
+        "description": "A list of entity objects. See m1lattice.spec.core."
+      },
+      "links": {
+        "type": "array",
+        "required": false,
+        "description": "A list of link objects. See m1lattice.spec.core."
+      },
+      "aspects": {
+        "type": "array",
+        "required": false,
+        "description": "A list of aspect objects. See m1lattice.spec.core."
+      },
+      "tables": {
+        "type": "object",
+        "required": false,
+        "description": "A mapping of identifiers to resource locations. See m1lattice.spec.core."
+      }
+    },
+    "rules": [
+      "All top-level sections are optional except the 'm1' header.",
+      "A transport unit may contain any subset of entities, links, aspects, and tables.",
+      "Multiple transport units may contribute data about the same entity.",
+      "Transport units are not required to be complete or self-contained."
+    ]
+  },
+  "composition": {
+    "description": "Multiple transport units are combined through identity-based merging.",
+    "rules": [
+      "Entities with the same identifier are merged into a single logical entity.",
+      "Links with the same identifier are merged into a single logical link.",
+      "Aspects are attached to their referenced entity via 'entity_id'.",
+      "Tables are merged by identifier, combining available location entries.",
+      "No transport unit is considered authoritative over another."
+    ]
+  },
+  "identity_resolution": {
+    "description": "Identity resolution governs how objects from multiple transport units are unified.",
+    "rules": [
+      "The 'id' field (GUID or equivalent) is the authoritative identifier.",
+      "The 'tag_uri' field, when present, must map to exactly one identifier.",
+      "If two objects share the same identifier, they are considered the same entity or link.",
+      "If conflicting identity mappings are encountered (e.g., tag_uri mapping to different IDs), this is an error.",
+      "Implementations must resolve tag_uri values to their corresponding identifiers when possible."
+    ]
+  },
+  "merge_rules": {
+    "description": "Defines how multiple contributions to the same object are combined.",
+    "rules": [
+      "Additive fields (e.g., tags, log entries) may be combined.",
+      "Scalar fields (e.g., name, description) must not conflict; conflicts are errors.",
+      "Aspects are accumulated and do not overwrite each other unless explicitly designed to do so.",
+      "Links are merged by identifier and must not conflict in structure (from/to/type).",
+      "Implementations should fail fast on non-trivial conflicts."
+    ]
+  },
+  "loading_model": {
+    "description": "Defines the conceptual behavior of loading M1 transport units into memory.",
+    "rules": [
+      "Loading produces a merged, identity-indexed view of the data.",
+      "Entities are retrievable by identifier (id or tag_uri).",
+      "Links are indexed by 'from' and 'to' relationships.",
+      "Aspects are attached to their corresponding entities.",
+      "Tables provide resolution context but do not alter the ontology.",
+      "Implementations are not required to use a specific in-memory structure."
+    ]
+  },
+  "mutation_model": {
+    "description": "Defines how changes are represented in transport units.",
+    "rules": [
+      "Transport units may represent incremental additions to the graph.",
+      "Updates may be expressed by providing new values for existing identifiers.",
+      "Implementations may use last-write-wins semantics for scalar fields.",
+      "Append-only and layered models are supported but not required.",
+      "Transport format does not prescribe a specific persistence strategy."
+    ]
+  },
+  "tables_handling": {
+    "description": "Defines how tables behave within transport.",
+    "rules": [
+      "Tables are optional and represent environment-specific resolution data.",
+      "Tables map identifiers to one or more resource locations.",
+      "Multiple tables may contribute mappings for the same identifier.",
+      "Tables are not authoritative and may differ across environments.",
+      "Systems may ignore table entries they cannot interpret."
+    ]
+  },
+  "boundaries": {
+    "description": "Defines how transport units relate to datasets and environments.",
+    "rules": [
+      "Transport units do not define dataset boundaries.",
+      "Datasets are defined by the set of transport units loaded by a system.",
+      "The same transport unit may participate in multiple datasets.",
+      "Systems must not assume completeness of any dataset."
+    ]
+  },
+  "interoperability": {
+    "description": "Defines how systems exchange and interpret transport units.",
+    "rules": [
+      "Systems must recognize the 'm1.version' header.",
+      "Systems must support partial data and incremental loading.",
+      "Systems must interoperate via shared identity conventions.",
+      "No shared schema is required beyond m1lattice.spec.core and this transport specification."
+    ]
+  },
+  "minimal_compliance": [
+    "Recognizes M1 transport header",
+    "Parses entities, links, aspects, and tables",
+    "Resolves identity via id and tag_uri",
+    "Merges multiple transport units",
+    "Detects and reports conflicts"
+  ]
+}

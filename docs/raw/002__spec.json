@@ -2,81 +2,210 @@
   "document": {
     "document-id": "m1lattice.spec.core",
     "title": "M1 Lattice: Core Specification",
-    "purpose": "Defines the structure and behavior of entities, links, aspects, and tables in the M1 Lattice system."
+    "purpose": "Defines the structure and behavior of entities, links, aspects, and tables in the M1 Lattice system.",
+    "version": "v1.0",
+    "status": "stable"
   },
-  "entities": {
-    "identity": {
-      "description": "Each entity must have at least one stable identifier.",
-      "fields": {
-        "guid": { "type": "string", "required": false },
-        "tag_uri": { "type": "string", "required": false }
-      },
-      "rules": [
-        "At least one identifier must be present",
-        "Identifiers should be globally unique",
-        "Identifiers are immutable once assigned"
-      ]
+  "common_fields": {
+    "id": {
+      "type": "string",
+      "required": true,
+      "description": "Primary identifier for the object. Must be a GUID (or other opaque unique string). This value is stable and immutable once assigned."
     },
-    "core_fields": {
-      "name": { "type": "string", "required": false },
-      "title": { "type": "string", "required": false },
-      "description": { "type": "string", "required": false },
-      "tags": { "type": "array", "required": false },
-      "url": { "type": "string", "required": false },
-      "image": { "type": "string", "required": false },
-      "notes": { "type": "string", "required": false },
-      "log": { "type": "array", "required": false },
-      "hook": { "type": "string", "required": false }
+    "tag_uri": {
+      "type": "string",
+      "required": false,
+      "description": "Optional Tag URI (must begin with 'tag:'). Provides a human-meaningful or globally coordinated identifier associated with this object. Serves as an alias to the primary 'id' and must refer to the same entity."
     },
-    "mutability": {
-      "identity": "immutable",
-      "other_fields": "mutable"
+    "type": {
+      "type": "string",
+      "required": false,
+      "description": "Reference to a type entity, expressed as an 'id' value (GUID or Tag URI)."
+    },
+    "typehint": {
+      "type": "string",
+      "required": false,
+      "description": "Human-readable classification (e.g., 'person', 'document', 'place'). Informational only; not authoritative."
     }
   },
+  "entity_reference": {
+    "description": "Defines how entities and links are referenced throughout the M1 Lattice system.",
+    "rules": [
+      "References to entities or links may use either the 'id' (GUID) or the 'tag_uri' value.",
+      "The 'id' field is the authoritative identifier for an object.",
+      "The 'tag_uri' field, when present, is an alias that refers to the same object as its 'id'.",
+      "Implementations should resolve 'tag_uri' values to their corresponding 'id' values for internal processing when possible.",
+      "Systems must accept references expressed as either 'id' or 'tag_uri'.",
+      "References are expressed as strings; a value beginning with 'tag:' is interpreted as a tag URI.",
+      "Implementations may maintain a mapping between 'tag_uri' and 'id' to support resolution.",
+      "Programs may prefer to present 'tag_uri' values to users when available, as they are human- and AI-readable identifiers. When no 'tag_uri' is present, 'id' may be used as a fallback."
+    ]
+  },
+  "entities": {
+    "description": "A uniquely identifiable unit of existence within the M1 Lattice.  An Entity serves as a stable anchor for basic information.  Information beyond these bounds is added with Aspects, described elsewhere in the document.",
+    "fields": {
+      "name": {
+        "type": "string",
+        "required": false,
+        "description": "A short, program-friendly identifier or label for the entity. Typically concise and stable, and may be used in code or compact displays.",
+        "legal_form": "[a-zA-Z][a-zA-Z0-9_-]*"
+      },
+      "title": {
+        "type": "string",
+        "required": false,
+        "description": "A human-readable title for the entity, suitable for display in user interfaces. May be longer or more descriptive than 'name'."
+      },
+      "description": {
+        "type": "string",
+        "required": false,
+        "description": "A textual explanation of the entity, providing context, meaning, or interpretation.  Typically a paragraph long, but could be empty, or could be as long as an essay."
+      },
+      "tags": {
+        "type": "array",
+        "required": false,
+        "description": "A list of classification labels used to group or categorize the entity. Tags are informal and may evolve over time."
+      },
+      "url": {
+        "type": "string",
+        "required": false,
+        "description": "A URL associated with the entity, typically pointing to an external resource or canonical reference.",
+        "example": "If the entity is Amazon (the company), the URL entry would likely be 'https://amazon.com'.  For a web page bookmark, the url would be the URL of the bookmark."
+      },
+      "file": {
+        "type": "string",
+        "required": false,
+        "description": "Reference to a file resource associated with this entity. Typically and preferably, a GUID or identifier resolvable via tables.  Direct URLs and paths are allowed, but discouraged.  Represents a primary or canonical file for the entity."
+      },
+      "image": {
+        "type": "string",
+        "required": false,
+        "description": "A reference to an image representing the entity.  It follows the rules of 'file' -- preferably a GUID or identifier resolvable via tables.  Direct URLs and paths are allowed, but discouraged."
+      },
+      "notes": {
+        "type": "string",
+        "required": false,
+        "description": "Free-form notes or additional information about the entity. Intended for informal or unstructured content."
+      },
+      "log": {
+        "type": "array",
+        "required": false,
+        "description": "A chronological record of events or changes related to the entity. Each entry may capture actions such as creation, modification, or observation."
+      },
+      "hook": {
+        "type": "string",
+        "required": false,
+        "description": "A concise, attention-directing expression, often a phrase, intended to quickly convey the entity's significance or invite engagement."
+      }
+    },
+    "typing_guidance": [
+      "Entities are typically described using 'typehint' to provide a human-readable indication of their general nature.",
+      "The 'type' field may be present to reference a more precise type entity, but is neither required nor even recommended.",
+      "Entities are not defined by their type; typing is additive through Aspects, and may evolve over time."
+    ]
+  },
   "links": {
-    "structure": {
-      "from": { "type": "entity-id", "required": true },
-      "to": { "type": "entity-id", "required": true },
-      "type": { "type": "string", "required": false },
-      "direction": { "type": "string", "enum": ["uni", "bi"], "required": false }
+    "description": "Links are entities that represent relationships between entities.",
+    "required_fields": {
+      "from": {
+        "type": "string",
+        "required": true,
+        "description": "The identifier ('id' or 'tag_uri') of the source entity in the relationship."
+      },
+      "to": {
+        "type": "string",
+        "required": true,
+        "description": "The identifier ('id' or 'tag_uri') of the target entity in the relationship."
+      }
+    },
+    "optional_fields": {
+      "type": {
+        "type": "string",
+        "required": false,
+        "description": "Reference to a type entity describing the relationship between 'from' and 'to'."
+      },
+      "typehint": {
+        "type": "string",
+        "required": false,
+        "description": "Human-readable description of the relationship (e.g., 'parent-child', 'authored-by')."
+      }
     },
     "rules": [
-      "Links may be stored independently of entities",
-      "Links may be promoted to full entities"
+      "Links inherit all common fields",
+      "Links may be extended with additional fields or aspects",
+      "Links are first-class entities and may be referenced independently"
     ]
   },
   "aspects": {
-    "structure": {
-      "entity_id": { "type": "entity-id", "required": true },
-      "aspect_type": { "type": "string", "required": true },
-      "data": { "type": "object", "required": true }
+    "description": "An Aspect is a structured perspective on an entity. It represents a cohesive and coherent collection of data describing the entity from a particular point of view. Aspects are not required to be complete or authoritative; multiple aspects may exist for the same entity, potentially offering differing or conflicting perspectives.",
+    "required_fields": {
+      "entity_id": {
+        "type": "string",
+        "required": true,
+        "description": "The 'id' or 'tag_uri' of the entity to which this aspect applies."
+      },
+      "data": {
+        "type": "object",
+        "required": true,
+        "description": "A JSON object containing the data associated with this perspective. The structure of this object is determined by the aspect's type, if present."
+      }
+    },
+    "optional_fields": {
+      "type": {
+        "type": "string",
+        "required": false,
+        "description": "Reference to a type entity describing the structure and interpretation of this aspect. Strongly recommended but not required."
+      },
+      "typehint": {
+        "type": "string",
+        "required": false,
+        "description": "Human-readable classification of the aspect's nature."
+      }
     },
     "rules": [
-      "Entities may have zero or more aspects",
-      "Multiple aspects of the same type may be allowed",
-      "Aspects should be independently stored and retrievable"
+      "Aspects represent perspectives or claims about an entity.",
+      "Aspects may be incomplete and are not required to be authoritative.",
+      "Multiple aspects may exist for a single entity, including conflicting ones.",
+      "Interpretation, validation, and conflict resolution are the responsibility of consuming systems, not this specification.",
+      "Aspect data is conceptually free-form, but may be constrained by its type when a type is specified.",
+      "Aspects should be independently stored and retrievable.",
+      "Aspects do not modify the identity of an entity."
     ]
   },
   "tables": {
-    "description": "Maps identifiers to resource locations.",
+    "description": "Tables provide a mapping from identifiers to resource locations. They are not part of the M1 Lattice ontology, but serve as a local resolution layer connecting entities to concrete resources such as files or URLs.",
     "structure": {
-      "entity_id": { "type": "entity-id", "required": true },
-      "locations": {
+      "<identifier>": {
         "type": "array",
+        "description": "A list of locations where the referenced entity may be found.",
         "items": {
           "type": "object",
           "fields": {
-            "type": { "type": "string", "example": ["file", "url"] },
-            "path": { "type": "string", "required": false },
-            "value": { "type": "string", "required": false }
+            "type": {
+              "type": "string",
+              "required": true,
+              "description": "The type of location. Common values include 'file' and 'url', but the set of valid types is open and may be extended."
+            },
+            "path": {
+              "type": "string",
+              "required": false,
+              "description": "A local filesystem path. Required when type is 'file'."
+            },
+            "url": {
+              "type": "string",
+              "required": false,
+              "description": "A string representing the location value, such as a URL. Required when type is 'url'."
+            }
           }
         }
       }
     },
     "rules": [
-      "Tables may contain multiple locations per entity",
-      "Systems should resolve using available sources",
-      "Tables may be distributed and merged"
+      "Tables map identifiers (id or tag_uri) to zero or more resource locations.",
+      "Multiple locations per identifier are allowed and expected.",
+      "Tables are environment-specific and may differ across systems.",
+      "The M1 Lattice specification does not define how a location is selected; this is the responsibility of consuming applications.",
+      "The set of location types is open; implementations may define additional types beyond 'file' and 'url'.",
+      "Tables are not required for operation of the lattice, but provide a mechanism for resolving entities to concrete resources."
     ]
   },
   "storage_model": {
@@ -87,13 +216,14 @@
     ]
   },
   "interoperability": {
-    "description": "Systems interoperate via shared identifiers.",
-    "requirement": "No shared schema required beyond identity conventions"
+    "description": "Systems interoperate via shared identifiers and type references.",
+    "requirement": "No shared schema required beyond identity and typing conventions"
   },
   "minimal_compliance": [
     "Recognizes entity identity",
-    "Resolves entity references",
-    "Processes links",
-    "Reads or attaches aspects"
+    "Supports optional type and typehint fields",
+    "Processes links as entities with endpoints",
+    "Supports typed aspects",
+    "Resolves entity references"
   ]
 }

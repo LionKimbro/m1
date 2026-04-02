@@ -1,0 +1,127 @@
+{
+  "document": {
+    "document-id": "m1lattice.status",
+    "title": "M1 Lattice — Status and Progress Tracking",
+    "tags": [
+      "m1",
+      "status",
+      "tracking",
+      "command-center"
+    ],
+    "purpose": "Provide a clear, continuously updated map of the current state of the M1 system, including component status, infrastructure readiness, interface development, and next required actions. This document is the execution-facing mirror of progress."
+  },
+  "context": {
+    "threads": {
+      "M1-DESIGN": "Philosophy and specification development",
+      "M1-CMD": "Execution, tracking, and progress management (this document)",
+      "M1-*": "Task-specific or topic-specific work threads"
+    },
+    "paths": {
+      "M1-DESIGN": "https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f",
+      "M1-CMD": "https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9"
+    },
+    "principle": "Separate design from execution. This document reflects what is, what is incomplete, and what comes next."
+  },
+  "status_map": {
+    "core_documents": {
+      "001__philosophy.json": {
+        "id": "m1lattice.philosophy",
+        "status": "present",
+        "notes": "Defines the conceptual foundation of the M1 Lattice."
+      },
+      "002__spec.json": {
+        "id": "m1lattice.spec.core",
+        "status": "active",
+        "notes": "Primary focus. Core data structures and rules are being clarified and corrected."
+      },
+      "003__semantic-examination.json": {
+        "id": "m1lattice.semantic-examination",
+        "status": "present",
+        "notes": "Explores meaning formation and semantic gradients within the lattice."
+      },
+      "004__status.json": {
+        "id": "m1lattice.status",
+        "status": "present",
+        "notes": "Clear, continuously updated map of the current state of the M1 system."
+      }
+    },
+    "model_components": {
+      "core_identity": {
+        "status": "stabilized",
+        "notes": "Identity structure is core to Entities, Links, and Aspects."
+      },
+      "entities": {
+        "status": "stabilized",
+        "notes": "Entity structure is well defined."
+      },
+      "links": {
+        "status": "concept-clear",
+        "notes": "Strong conceptual clarity; needs formal written specification."
+      },
+      "aspects": {
+        "status": "concept-defined",
+        "notes": "Concept established; structure and constraints not yet formalized."
+      },
+      "tables": {
+        "status": "introduced",
+        "notes": "Present as idea and partial structure; not yet formalized."
+      }
+    },
+    "infrastructure": {
+      "object_storage_format": {
+        "status": "missing",
+        "notes": "Transport layer not yet defined. Critical for persistence and interchange."
+      },
+      "guid_and_tag_uri": {
+        "status": "mostly-solved",
+        "notes": "Mechanisms largely understood; may need formal codification."
+      },
+      "table_resolution": {
+        "status": "mostly-solved",
+        "notes": "Operational understanding exists; requires formal specification."
+      }
+    },
+    "interface": {
+      "object_browser": {
+        "status": "not-built",
+        "notes": "No dedicated M1 browser yet. projlist/zoo provides a reference model."
+      },
+      "link_navigation_view": {
+        "status": "not-built",
+        "notes": "No interface for traversing links interactively."
+      }
+    }
+  },
+  "active_focus": {
+    "primary": "Advance and stabilize m1lattice.spec.core",
+    "supporting": [
+      "Stabilize Link",
+      "Stabilize Aspect",
+      "Stabilize Table"
+    ]
+  },
+  "next_steps": [
+    {
+      "priority": 1,
+      "action": "Resolve m1lattice.spec.core Link, Aspect, and Table",
+      "result": "Stable definitions for all core parts"
+    },
+    {
+      "priority": 2,
+      "action": "Define the transport/object storage format -- system metadata, file typing, and containment.",
+      "result": "Foundation for persistence and system interoperability"
+    },
+    {
+      "priority": 3,
+      "action": "Outline how the data will be interacted with in-process: functions, data structures, ingestion and returning back to disk."
+    }
+  ],
+  "next-action": "Define minimal Link JSON structure",
+  "rules": [
+    "This document reflects reality, not intention.",
+    "Statuses must be updated as work progresses.",
+    "Do not expand scope during execution cycles.",
+    "Keep focus on spec.core until stabilized.",
+    "Clarity over completeness."
+  ]
+}
