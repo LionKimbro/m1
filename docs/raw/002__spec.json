@@ -81,6 +81,16 @@
         "required": false,
         "description": "A reference to an image representing the entity.  It follows the rules of 'file' -- preferably a GUID or identifier resolvable via tables.  Direct URLs and paths are allowed, but discouraged."
       },
+      "date": {
+        "type": "string",
+        "required": false,
+        "description": "A general-purpose date associated with the entity. Interpretation is context-dependent."
+      },
+      "location": {
+        "type": "string",
+        "required": false,
+        "description": "A general-purpose location associated with the entity. Interpretation is context-dependent."
+      },
       "notes": {
         "type": "string",
         "required": false,

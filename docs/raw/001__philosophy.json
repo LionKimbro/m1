@@ -10,15 +10,22 @@
     "title": "M1 Lattice: Philosophy and Direction",
     "purpose": "Conceptual foundation of the M1 Lattice system, describing entities, links, aspects, and tables as a distributed identity-centered data model."
   },
-  "core_idea": "The M1 Lattice is a non-authoritative, identity-merged distributed graph. Entities exist independently, and structure emerges through the merging of contributions across systems via shared identity. Entities may be given simple, foundational information, such as descriptions, URLs, tags, or images, to make them generically browsable. They can then be enriched over time through the addition of aspects, each contributing a distinct dimension of meaning. Entities may also be connected through links, which themselves can be treated as entities within the lattice. Meaning emerges and evolves within this structure, beginning informally and becoming more precise over time, forming a gradient from human-readable hints to formal, referential definitions.",
+  "core_idea": "The M1 Lattice is a non-authoritative, identity-merged distributed graph. Entities exist independently, and structure emerges through the merging of contributions across systems via shared identity. Each transport unit contributes knowledge to a shared global graph; no single source is authoritative. Entities may be given simple, foundational information, such as names, descriptions, dates, locations, URLs, tags, or images, to make them generically browsable and usable with minimal definition. Entities may also be connected through links, which express relationships and are themselves first-class entities within the lattice. Over time, entities and links can be enriched through aspects, which introduce more structured and precise dimensions of meaning. Meaning evolves within this system from simple, human-readable expressions toward more formal, referential definitions.",
   "entities": {
     "description": "An entity is a uniquely identifiable unit of existence within the system.",
     "identity": "Defined by a stable primary identifier (such as a GUID), with optional human-meaningful identifiers (such as tag URIs) that may also refer to the entity.",
-    "properties": "All other properties are optional and attachable, not intrinsic.",
+    "properties": "All properties aside from identity are optional and mutable. Core fields (such as name, title, description, date, or location) are lightweight, general-purpose expressions intended for immediate usability. These fields are not authoritative and may be interpreted differently depending on context.",
     "characteristics": [
       "independently creatable",
       "independently discoverable",
+      "usable with minimal information",
       "extensible without modifying original structure"
+    ],
+    "philosophy": [
+      "Identity is the only required truth.",
+      "Core fields provide expressive hints, not formal definitions.",
+      "Ambiguity at the core enables flexibility and early use.",
+      "Precision is introduced through aspects, not required at creation time."
     ]
   },
   "links": {
@@ -28,7 +35,12 @@
       "may include human-readable type hints and formal type references",
       "first-class (may themselves be entities)"
     ],
-    "purpose": "Allow relationships to be represented, extended, and referenced independently of the entities they connect."
+    "purpose": "Allow relationships to be represented, extended, and referenced independently of the entities they connect.",
+    "philosophy": [
+      "Links are as fundamental as entities.",
+      "Relationships exist independently of ownership or containment.",
+      "Meaning emerges through connection."
+    ]
   },
   "aspects": {
     "description": "Aspects describe independent dimensions or perspectives of an entity.",
@@ -37,6 +49,12 @@
       "add structured data or behavior",
       "attachable and removable independently",
       "enable participation in multiple conceptual systems"
+    ],
+    "philosophy": [
+      "Aspects introduce precision and structure.",
+      "Multiple aspects may coexist, including conflicting ones.",
+      "Aspects represent perspectives or claims, not enforced truth.",
+      "The core entity remains stable while interpretations evolve."
     ]
   },
   "tables": {
@@ -45,6 +63,11 @@
       "resolve entity IDs to file paths",
       "resolve entity IDs to URLs",
       "bridge abstract identity and concrete storage"
+    ],
+    "philosophy": [
+      "Tables are contextual and environment-dependent.",
+      "They are not part of the core ontology.",
+      "They provide resolution, not meaning."
     ]
   },
   "lattice_nature": {
@@ -62,11 +85,13 @@
   },
   "design_principles": [
     "Identity is stable; structure is fluid.",
-    "Links exist independently of the entities they connect.",
-    "Aspects describe independent dimensions or perspectives of an entity.",
-    "Data formats do not matter; they can always be translated.",
-    "Meaning evolves along a gradient, from simple identities, to richly defined entities with many aspects, and detailed links to other entities.",
+    "M1 is a non-authoritative, identity-merged distributed graph.",
+    "Transport units contribute knowledge; they do not define ownership.",
+    "Core fields are expressive and intentionally ambiguous.",
+    "Aspects provide structured, precise interpretations.",
+    "Meaning evolves from simple hints to formal definitions.",
+    "Links and entities are equally fundamental.",
     "The lattice represents perspectives and claims, not enforced truths."
   ],
-  "vision": "A distributed data universe where any object can be referenced universally, systems interoperate through shared identity, and structure emerges from use rather than prescription."
+  "vision": "A distributed data universe where any object can be referenced universally, systems interoperate through shared identity, and structure emerges from use rather than prescription. The system supports immediate, informal use while enabling gradual refinement into precise, structured knowledge."
 }
