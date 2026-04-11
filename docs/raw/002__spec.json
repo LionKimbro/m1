@@ -4,7 +4,10 @@
     "title": "M1 Lattice: Core Specification",
     "purpose": "Defines the structure and behavior of entities, links, aspects, and tables in the M1 Lattice system.",
     "version": "v1.0",
-    "status": "stable"
+    "status": "stable",
+    "superseded-by": [
+      "m1lattice.spec.core.v2"
+    ]
   },
   "common_fields": {
     "id": {
