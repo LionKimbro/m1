@@ -7,6 +7,9 @@
     "purpose": "Defines the transport and object storage model for M1 Lattice data, including file-level semantics, composition rules, identity resolution, and loading behavior.",
     "references": [
       "m1lattice.spec.core"
+    ],
+    "superseded-by": [
+      "m1lattice.spec.transport.v2"
     ]
   },
   "overview": "The M1 transport model defines how M1 data is represented, stored, and exchanged between systems. Transport units are designed as composable fragments of a global identity-merged graph. Files do not represent closed datasets or authoritative sources, but instead contribute knowledge to a shared, distributed structure.",

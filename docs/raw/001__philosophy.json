@@ -11,6 +11,33 @@
     "purpose": "Conceptual foundation of the M1 Lattice system, describing entities, links, aspects, and tables as a distributed identity-centered data model."
   },
   "core_idea": "The M1 Lattice is a non-authoritative, identity-merged distributed graph. Entities exist independently, and structure emerges through the merging of contributions across systems via shared identity. Each transport unit contributes knowledge to a shared global graph; no single source is authoritative. Entities may be given simple, foundational information, such as names, descriptions, dates, locations, URLs, tags, or images, to make them generically browsable and usable with minimal definition. Entities may also be connected through links, which express relationships and are themselves first-class entities within the lattice. Over time, entities and links can be enriched through aspects, which introduce more structured and precise dimensions of meaning. Meaning evolves within this system from simple, human-readable expressions toward more formal, referential definitions.",
+  "vision": "A distributed data universe where any object can be referenced universally, systems interoperate through shared identity, and structure emerges from use rather than prescription. The system supports immediate, informal use while enabling gradual refinement into precise, structured knowledge.",
+  "design_axioms": [
+    "Good data systems have stable identity, flexible representation, and cheap transformation."
+  ],
+  "design_principles": [
+    "Identity is stable; structure is fluid.",
+    "M1 is a non-authoritative, identity-merged distributed graph.",
+    "Transport units contribute knowledge; they do not define ownership.",
+    "Core fields are expressive and intentionally ambiguous.",
+    "Aspects provide structured, precise interpretations.",
+    "Meaning evolves from simple hints to formal definitions.",
+    "Links and entities are equally fundamental.",
+    "The lattice represents perspectives and claims, not enforced truths."
+  ],
+  "lattice_nature": {
+    "description": "The system forms a lattice rather than a hierarchy.",
+    "properties": [
+      "no single root",
+      "multiple overlapping structures",
+      "partial ordering instead of strict hierarchy"
+    ],
+    "implications": [
+      "decentralized growth",
+      "flexible recombination",
+      "resilience to change"
+    ]
+  },
   "entities": {
     "description": "An entity is a uniquely identifiable unit of existence within the system.",
     "identity": "Defined by a stable primary identifier (such as a GUID), with optional human-meaningful identifiers (such as tag URIs) that may also refer to the entity.",
@@ -28,20 +55,6 @@
       "Precision is introduced through aspects, not required at creation time."
     ]
   },
-  "links": {
-    "description": "Links are entities that express relationships between other entities.",
-    "properties": [
-      "directional or bidirectional",
-      "may include human-readable type hints and formal type references",
-      "first-class (may themselves be entities)"
-    ],
-    "purpose": "Allow relationships to be represented, extended, and referenced independently of the entities they connect.",
-    "philosophy": [
-      "Links are as fundamental as entities.",
-      "Relationships exist independently of ownership or containment.",
-      "Meaning emerges through connection."
-    ]
-  },
   "aspects": {
     "description": "Aspects describe independent dimensions or perspectives of an entity.",
     "inspiration": "Entity-Component Systems (ECS)",
@@ -57,6 +70,20 @@
       "The core entity remains stable while interpretations evolve."
     ]
   },
+  "links": {
+    "description": "Links are entities that express relationships between other entities.",
+    "properties": [
+      "directional or bidirectional",
+      "may include human-readable type hints and formal type references",
+      "first-class (may themselves be entities)"
+    ],
+    "purpose": "Allow relationships to be represented, extended, and referenced independently of the entities they connect.",
+    "philosophy": [
+      "Links are as fundamental as entities.",
+      "Relationships exist independently of ownership or containment.",
+      "Meaning emerges through connection."
+    ]
+  },
   "tables": {
     "description": "Mappings between identifiers and resource locations.",
     "purpose": [
@@ -69,29 +96,5 @@
       "They are not part of the core ontology.",
       "They provide resolution, not meaning."
     ]
-  },
-  "lattice_nature": {
-    "description": "The system forms a lattice rather than a hierarchy.",
-    "properties": [
-      "no single root",
-      "multiple overlapping structures",
-      "partial ordering instead of strict hierarchy"
-    ],
-    "implications": [
-      "decentralized growth",
-      "flexible recombination",
-      "resilience to change"
-    ]
-  },
-  "design_principles": [
-    "Identity is stable; structure is fluid.",
-    "M1 is a non-authoritative, identity-merged distributed graph.",
-    "Transport units contribute knowledge; they do not define ownership.",
-    "Core fields are expressive and intentionally ambiguous.",
-    "Aspects provide structured, precise interpretations.",
-    "Meaning evolves from simple hints to formal definitions.",
-    "Links and entities are equally fundamental.",
-    "The lattice represents perspectives and claims, not enforced truths."
-  ],
-  "vision": "A distributed data universe where any object can be referenced universally, systems interoperate through shared identity, and structure emerges from use rather than prescription. The system supports immediate, informal use while enabling gradual refinement into precise, structured knowledge."
+  }
 }

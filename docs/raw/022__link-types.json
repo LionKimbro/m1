@@ -1,0 +1,31 @@
+{
+  "document": {
+    "document-id": "m1lattice.vocab.linktypes.v1",
+    "title": "M1 Lattice: Recommended Link Types",
+    "status": "draft",
+    "purpose": "Provides a shared set of commonly useful link types to promote consistency across M1 systems."
+  },
+  "description": "This document defines a set of commonly used link type entities. These are recommendations, not requirements.",
+  "linktypes": [
+    {
+      "id": "tag:m1lattice.net:/linktype/parent-child",
+      "title": "Parent → Child",
+      "description": "Indicates a hierarchical containment or derivation relationship."
+    },
+    {
+      "id": "tag:m1lattice.net:/linktype/points-to",
+      "title": "Points To",
+      "description": "Indicates a directional reference or pointer."
+    },
+    {
+      "id": "tag:m1lattice.net:/linktype/member-of",
+      "title": "Member Of",
+      "description": "Indicates membership in a group or collection."
+    },
+    {
+      "id": "tag:m1lattice.net:/linktype/resource-for",
+      "title": "Resource For",
+      "description": "Indicates entity is a resource for another entity."
+    }
+  ]
+}

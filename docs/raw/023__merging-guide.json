@@ -1,0 +1,78 @@
+{
+  "document": {
+    "document-id": "m1lattice.merging.guide.v1",
+    "title": "M1 Lattice: Merging Guide",
+    "purpose": "Provides guidance for combining multiple M1 transport units within applications. Merging behavior is not prescribed by the M1 specification and is left to the discretion of the consuming system.",
+    "version": "v1.0",
+    "status": "draft",
+    "created": "2026-04-11"
+  },
+  "core_statement": "Merging behavior is defined by the consuming application. M1 does not prescribe how data should be combined, prioritized, or resolved.",
+  "merging_authority": {
+    "description": "Applications are responsible for determining how M1 data is merged and interpreted.",
+    "principles": [
+      "Applications determine which data to import, retain, or discard.",
+      "Applications define conflict resolution strategies.",
+      "Applications may prioritize sources, timestamps, or other criteria.",
+      "No single transport unit is authoritative."
+    ]
+  },
+  "merging_model": {
+    "description": "Merging is the process of combining contributions from multiple transport units into a working set.",
+    "principles": [
+      "Merging combines contributions; it does not resolve truth.",
+      "All data may be preserved unless explicitly discarded by the application.",
+      "Conflicts should not be silently resolved without explicit policy.",
+      "Merging behavior should be consistent and predictable within an application."
+    ]
+  },
+  "merging_process": {
+    "description": "A common baseline approach for merging transport units.",
+    "steps": [
+      "Initialize an empty mapping of entity-id to aspects.",
+      "For each transport unit:",
+      "  For each entity-id in the unit:",
+      "    If the entity-id is not present, create a new entry.",
+      "    For each aspect associated with the entity:",
+      "      If the aspect-id is not present, attach it.",
+      "      If the aspect-id is already present:",
+      "        If the aspect content is identical, do nothing.",
+      "        If the aspect content differs, treat as a conflict."
+    ],
+    "notes": [
+      "This process is illustrative, not prescriptive.",
+      "Applications may implement alternative strategies."
+    ]
+  },
+  "conflict_handling": {
+    "description": "Conflicts occur when multiple values exist for the same entity and aspect-id.",
+    "approaches": [
+      "Accumulate: Preserve all values and defer interpretation.",
+      "Select: Choose a single value based on defined criteria.",
+      "Annotate: Record conflicts explicitly as data.",
+      "Partition: Maintain separate views or layers per source."
+    ],
+    "notes": [
+      "No default conflict resolution strategy is defined by M1.",
+      "Applications are responsible for defining their own approach."
+    ]
+  },
+  "guidance": {
+    "description": "Considerations to assist implementers in designing merging behavior.",
+    "questions": [
+      "What should happen when two aspects of the same type differ?",
+      "Should all values be preserved, or should one be selected?",
+      "If selecting one value, what determines priority (e.g., source, timestamp, trust level)?",
+      "How should identical values be detected and deduplicated?",
+      "Should conflicting data be surfaced to the user?",
+      "Should conflicts be recorded as data (e.g., in logs or aspects)?",
+      "Are some aspects additive (e.g., logs), while others are singular (e.g., titles)?",
+      "Should merging be deterministic across runs?"
+    ]
+  },
+  "final_notes": [
+    "Merging is an application-level concern.",
+    "Different applications may implement different strategies for the same data.",
+    "The goal of this guide is to support thoughtful and explicit design decisions."
+  ]
+}

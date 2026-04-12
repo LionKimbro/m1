@@ -1,0 +1,104 @@
+{
+  "document": {
+    "document-id": "m1lattice.spec.transport.v2",
+    "title": "M1 Lattice: Transport Specification (Epoch 2)",
+    "purpose": "Defines how M1 entities and aspects are represented for storage and exchange.",
+    "version": "v2.0",
+    "status": "final",
+    "finalized": "2026-04-11",
+    "supersedes": [
+      "m1lattice.spec.transport"
+    ]
+  },
+  "core_principle": "An M1 transport unit is a structured collection of aspects indexed by entity identifier. Entities are represented solely by their identifiers, and all meaning is expressed through associated aspects.",
+  "design_principles": [
+    "Entities are identified solely by their identifier.",
+    "Aspects carry all meaning and structure.",
+    "Transport structure is optimized for convenience of reading and writing.",
+    "Transport does not prescribe in-memory representation.",
+    "Transport does not define merging or conflict resolution.",
+    "Partial knowledge is valid and expected."
+  ],
+  "scope": {
+    "description": "The transport specification defines how entities and aspects are serialized for storage and exchange. It does not define runtime behavior such as merging, conflict resolution, or query semantics."
+  },
+  "file_format": {
+    "description": "M1 transport units are typically stored as files with the '.m1' extension.",
+    "rules": [
+      "The '.m1' extension designates a file as containing M1 Lattice transport data.",
+      "Files with the '.m1' extension are expected to conform to this transport specification.",
+      "Applications may associate the '.m1' extension with tools for viewing, editing, or processing M1 data.",
+      "The use of the '.m1' extension is recommended but not required; transport units may also be embedded in other formats or systems."
+    ]
+  },
+  "minimal_compliance": [
+    "Recognizes entity identifiers",
+    "Supports aspect association with entities",
+    "Supports core aspect conventions",
+    "Parses transport structure into entity identifiers and associated aspects",
+    "Reads and exposes table mappings if present"
+  ],
+  "transport_unit": {
+    "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects. It represents a partial contribution to the M1 Lattice.",
+    "structure": {
+      "m1_version": {
+        "type": "string",
+        "required": true,
+        "example": "2.0",
+        "description": "Specifies the version of the M1 transport format."
+      },
+      "entities": {
+        "type": "object",
+        "required": false,
+        "description": "A mapping from entity identifiers to their associated aspects.",
+        "additional_properties": {
+          "type": "object",
+          "description": "An entity entry keyed by its identifier. The value is a mapping of aspect identifiers to aspect contents.",
+          "additional_properties": {
+            "type": "object",
+            "description": "Aspect content. The structure is determined by the aspect identifier."
+          }
+        }
+      },
+      "tables": {
+        "type": "object",
+        "required": false,
+        "description": "Optional mapping of identifiers to resource locations, as defined in the core specification."
+      }
+    }
+  },
+  "entity_representation": {
+    "description": "Entities are represented implicitly by their presence as keys in the 'entities' map or by reference within aspects.",
+    "rules": [
+      "An entity exists if its identifier appears in the transport unit.",
+      "An entity may be referenced without being explicitly defined.",
+      "An entity has no intrinsic structure beyond its identifier."
+    ]
+  },
+  "aspect_representation": {
+    "description": "Aspects are represented as key-value pairs associated with an entity identifier.",
+    "rules": [
+      "Each aspect is identified by its key (typically a Tag URI).",
+      "The value associated with the key is the aspect content.",
+      "Aspect structure is determined by its identifier.",
+      "Multiple aspects may be associated with a single entity."
+    ]
+  },
+  "containment": {
+    "description": "A transport unit represents a partial, non-authoritative contribution to the global graph.",
+    "rules": [
+      "Entities may reference identifiers not present in the same transport unit.",
+      "A transport unit does not imply completeness.",
+      "Multiple transport units may describe the same entity."
+    ]
+  },
+  "tables": {
+    "description": "Tables provide a mapping from identifiers to resource locations. They are not part of the M1 ontology.",
+    "rules": [
+      "Tables are optional.",
+      "Tables are environment-specific.",
+      "Tables may differ across systems without affecting identity.",
+      "Transport does not define how table entries are resolved."
+    ]
+  }
+}
