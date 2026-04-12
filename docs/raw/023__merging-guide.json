@@ -1,78 +1,109 @@
 {
   "document": {
-    "document-id": "m1lattice.merging.guide.v1",
+    "document-id": "m1lattice.merging.guide.v2",
     "title": "M1 Lattice: Merging Guide",
-    "purpose": "Provides guidance for combining multiple M1 transport units within applications. Merging behavior is not prescribed by the M1 specification and is left to the discretion of the consuming system.",
-    "version": "v1.0",
-    "status": "draft",
+    "purpose": "Provides exploratory guidance for combining M1 transport units. This document reflects early understanding and is expected to evolve with practical experience.",
+    "version": "v2.0",
+    "status": "exploratory",
     "created": "2026-04-11"
   },
-  "core_statement": "Merging behavior is defined by the consuming application. M1 does not prescribe how data should be combined, prioritized, or resolved.",
-  "merging_authority": {
-    "description": "Applications are responsible for determining how M1 data is merged and interpreted.",
-    "principles": [
-      "Applications determine which data to import, retain, or discard.",
-      "Applications define conflict resolution strategies.",
-      "Applications may prioritize sources, timestamps, or other criteria.",
-      "No single transport unit is authoritative."
-    ]
+  "core_statement": "Merging behavior is not defined by the M1 specification. Applications determine how data is combined, interpreted, or rejected.",
+  "status_note": {
+    "description": "This document is exploratory. It captures current thinking and patterns, but is not authoritative. It is expected to evolve as real-world usage reveals better approaches."
   },
-  "merging_model": {
-    "description": "Merging is the process of combining contributions from multiple transport units into a working set.",
+  "data_model_perspective": {
+    "description": "M1 transport units are best understood as partial contributions to a shared, evolving dataset rather than as self-contained documents.",
     "principles": [
-      "Merging combines contributions; it does not resolve truth.",
-      "All data may be preserved unless explicitly discarded by the application.",
-      "Conflicts should not be silently resolved without explicit policy.",
-      "Merging behavior should be consistent and predictable within an application."
-    ]
-  },
-  "merging_process": {
-    "description": "A common baseline approach for merging transport units.",
-    "steps": [
-      "Initialize an empty mapping of entity-id to aspects.",
-      "For each transport unit:",
-      "  For each entity-id in the unit:",
-      "    If the entity-id is not present, create a new entry.",
-      "    For each aspect associated with the entity:",
-      "      If the aspect-id is not present, attach it.",
-      "      If the aspect-id is already present:",
-      "        If the aspect content is identical, do nothing.",
-      "        If the aspect content differs, treat as a conflict."
+      "An M1 transport unit is a contribution, not a complete dataset.",
+      "Aspects may be understood as tables, keyed by entity identifier.",
+      "Entities correspond to rows within those tables.",
+      "Aspect contents represent values within those rows.",
+      "Multiple transport units may contribute overlapping or conflicting values."
     ],
-    "notes": [
-      "This process is illustrative, not prescriptive.",
-      "Applications may implement alternative strategies."
+    "implications": [
+      "Merging M1 data is a form of database reconciliation, not file merging.",
+      "Conflicts are natural and expected.",
+      "No transport unit is authoritative.",
+      "Applications construct their own working views of the dataset."
+    ],
+    "summary": "M1 transport units are fragments of a shared database. Merging them requires reconciling overlapping contributions."
+  },
+  "separation_of_concerns": {
+    "description": "Different systems play different roles in the handling of M1 data.",
+    "roles": [
+      "Producers: emit partial contributions.",
+      "Resolvers: reconcile conflicting data.",
+      "Consumers: operate on clean, well-defined data."
+    ],
+    "principles": [
+      "Not all applications should implement merging logic.",
+      "Conflict resolution is a distinct responsibility.",
+      "Consumers may rely on upstream tools to prepare data."
     ]
   },
-  "conflict_handling": {
-    "description": "Conflicts occur when multiple values exist for the same entity and aspect-id.",
+  "consumer_policy": {
+    "description": "Consumer applications may require data to be free of contradictions.",
+    "principles": [
+      "Applications may reject data that is not trivially mergeable.",
+      "Applications are not required to resolve conflicts.",
+      "Rejecting ambiguous data is a valid and recommended strategy for deterministic systems."
+    ],
+    "definition": {
+      "trivially_mergeable": "Data is trivially mergeable if, for any given entity and aspect, multiple values are either absent or identical."
+    },
+    "summary": "Consumers may demand clean input and delegate conflict resolution to other tools."
+  },
+  "conflict_response_strategies": {
+    "description": "Applications may respond to conflicting data in different ways.",
     "approaches": [
-      "Accumulate: Preserve all values and defer interpretation.",
-      "Select: Choose a single value based on defined criteria.",
-      "Annotate: Record conflicts explicitly as data.",
-      "Partition: Maintain separate views or layers per source."
+      "Accumulate: Preserve all values.",
+      "Select: Choose one value based on criteria.",
+      "Annotate: Record conflicts explicitly.",
+      "Partition: Maintain separate views or layers.",
+      "Quarantine: Select one value while preserving others for review.",
+      "Refuse: Reject or halt processing until conflicts are resolved."
     ],
     "notes": [
-      "No default conflict resolution strategy is defined by M1.",
-      "Applications are responsible for defining their own approach."
+      "No strategy is mandated by M1.",
+      "Different applications may adopt different strategies.",
+      "The choice of strategy depends on the application's purpose."
     ]
   },
-  "guidance": {
-    "description": "Considerations to assist implementers in designing merging behavior.",
-    "questions": [
-      "What should happen when two aspects of the same type differ?",
-      "Should all values be preserved, or should one be selected?",
-      "If selecting one value, what determines priority (e.g., source, timestamp, trust level)?",
-      "How should identical values be detected and deduplicated?",
-      "Should conflicting data be surfaced to the user?",
-      "Should conflicts be recorded as data (e.g., in logs or aspects)?",
-      "Are some aspects additive (e.g., logs), while others are singular (e.g., titles)?",
-      "Should merging be deterministic across runs?"
+  "log_centric_model": {
+    "description": "The log aspect is the primary mechanism for understanding change over time.",
+    "principles": [
+      "Structure (entities and aspects) represents current state.",
+      "The log represents the history of changes to an entity.",
+      "Conflict resolution decisions may be informed by examining log entries.",
+      "Time and change should be expressed through logs rather than embedded throughout the data model."
+    ],
+    "notes": [
+      "Applications may interpret logs differently depending on their needs.",
+      "Logs provide context but do not enforce resolution."
     ]
   },
-  "final_notes": [
-    "Merging is an application-level concern.",
-    "Different applications may implement different strategies for the same data.",
-    "The goal of this guide is to support thoughtful and explicit design decisions."
-  ]
+  "merging_baseline": {
+    "description": "A minimal, safe merging approach may be used as a starting point.",
+    "principles": [
+      "Combine all contributions.",
+      "If multiple values exist for the same entity and aspect:",
+      "  If identical, treat as one.",
+      "  If different, treat as a conflict."
+    ],
+    "notes": [
+      "This baseline avoids silent data loss.",
+      "It is intended as a foundation for further strategies."
+    ]
+  },
+  "tooling_expectation": {
+    "description": "Merging and conflict resolution are expected to be supported by dedicated tools.",
+    "principles": [
+      "Tools may detect and classify conflicts.",
+      "Tools may assist users in resolving conflicts.",
+      "Tools may produce clean, conflict-free datasets for consumption.",
+      "Tooling is expected to evolve alongside the ecosystem."
+    ],
+    "summary": "The ecosystem is expected to develop specialized tools for reconciliation and preparation of data."
+  },
+  "final_note": "Merging in M1 is not about determining a single truth. It is about managing overlapping contributions and making explicit decisions about how they are interpreted."
 }
