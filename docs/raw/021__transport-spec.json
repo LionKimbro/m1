@@ -60,7 +60,7 @@
           }
         }
       },
-      "tables": {
+      "table": {
         "type": "object",
         "required": false,
         "description": "Optional mapping of identifiers to resource locations, as defined in the core specification."
