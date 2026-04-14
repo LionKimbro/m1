@@ -10,22 +10,26 @@
     {
       "id": "tag:m1lattice.net:/linktype/parent-child",
       "title": "Parent → Child",
-      "description": "Indicates a hierarchical containment or derivation relationship."
+      "description": "Indicates a hierarchical containment or derivation relationship.",
+      "recommended_typehint": "parent-child"
     },
     {
       "id": "tag:m1lattice.net:/linktype/points-to",
       "title": "Points To",
-      "description": "Indicates a directional reference or pointer."
+      "description": "Indicates a directional reference or pointer.",
+      "recommended_typehint": "points-to"
     },
     {
       "id": "tag:m1lattice.net:/linktype/member-of",
       "title": "Member Of",
-      "description": "Indicates membership in a group or collection."
+      "description": "Indicates membership in a group or collection.",
+      "recommended_typehint": "member-of"
     },
     {
       "id": "tag:m1lattice.net:/linktype/resource-for",
       "title": "Resource For",
-      "description": "Indicates entity is a resource for another entity."
+      "description": "Indicates entity is a resource for another entity.",
+      "recommended_typehint": "resource-for"
     }
   ]
 }
