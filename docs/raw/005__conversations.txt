@@ -17,6 +17,21 @@ M1-FMT (core format development):
   https://chatgpt.com/c/69c80ea8-d290-83e8-a4ee-29ad24e465e6
 
 
+Work on the ZOO format code, (adapting to M1,)
+  and I realized that the transport spec (#021) was underspecified,
+  and came up with a giant to-do list for M1, that I'm working through:
+  https://chatgpt.com/c/69c404cf-2514-83e8-9c9a-362958fa8872
+
+apply 2026-04-13 changes
+  - in the 020-series of documents
+  - working on defining the transport spec, adding aliases too, ...
+  reason for departure: working to tighten up how we define JSON specs (objects, arrays, ...)
+  https://chatgpt.com/c/69dd27ae-97c4-83e8-a01c-065baa670ba2
+
+DETOUR: work on said soft-schema spec:
+  https://chatgpt.com/c/69dd2a48-1ce4-83e8-bcea-c7d248a12b34
+
+
 == General Conversations ==
 date: 2026-04-01
 
