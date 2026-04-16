@@ -8,6 +8,13 @@
     "finalized": "2026-04-11",
     "supersedes": [
       "m1lattice.spec.transport"
+    ],
+    "builds_on": [
+      "softspec.spec.v2",
+      "m1lattice.spec.core.v2"
+    ],
+    "see_also": [
+      "m1lattice.merging.guide.v2"
     ]
   },
   "core_principle": "An M1 transport unit is a structured collection of aspects indexed by entity identifier. Entities are represented solely by their identifiers, and all meaning is expressed through associated aspects.",
@@ -39,33 +46,13 @@
     "Reads and exposes table mappings if present"
   ],
   "transport_unit": {
-    "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects. It represents a partial contribution to the M1 Lattice.",
-    "structure": {
-      "m1_version": {
-        "type": "string",
-        "required": true,
-        "example": "2.0",
-        "description": "Specifies the version of the M1 transport format."
-      },
-      "entities": {
-        "type": "object",
-        "required": false,
-        "description": "A mapping from entity identifiers to their associated aspects.",
-        "additional_properties": {
-          "type": "object",
-          "description": "An entity entry keyed by its identifier. The value is a mapping of aspect identifiers to aspect contents.",
-          "additional_properties": {
-            "type": "object",
-            "description": "Aspect content. The structure is determined by the aspect identifier."
-          }
-        }
-      },
-      "table": {
-        "type": "object",
-        "required": false,
-        "description": "Optional mapping of identifiers to resource locations, as defined in the core specification."
-      }
-    }
+    "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects. It represents a partial contribution to the M1 Lattice. See the softspec schema 'transport_unit' for the formal structure.",
+    "rules": [
+      "All top-level sections are optional except the 'm1' header.",
+      "A transport unit may contain any subset of entities and aspects.",
+      "Multiple transport units may contribute data about the same entity.",
+      "Transport units are not required to be complete or self-contained."
+    ]
   },
   "entity_representation": {
     "description": "Entities are represented implicitly by their presence as keys in the 'entities' map or by reference within aspects.",
@@ -76,9 +63,9 @@
     ]
   },
   "aspect_representation": {
-    "description": "Aspects are represented as key-value pairs associated with an entity identifier.",
+    "description": "Aspects are represented as key-value pairs nested under an entity identifier.",
     "rules": [
-      "Each aspect is identified by its key (typically a Tag URI).",
+      "Each aspect is identified by its key within an entity entry, typically a Tag URI or entity-id.",
       "The value associated with the key is the aspect content.",
       "Aspect structure is determined by its identifier.",
       "Multiple aspects may be associated with a single entity."
@@ -92,6 +79,51 @@
       "Multiple transport units may describe the same entity."
     ]
   },
+  "composition": {
+    "description": "Multiple transport units may overlap, contributing data about the same entities. How overlapping contributions are combined is the responsibility of the consuming application, not the specification.",
+    "rules": [
+      "Entities with the same identifier refer to the same logical entity.",
+      "Multiple transport units may provide aspects for the same entity.",
+      "Tables from different transport units may map the same identifier to different locations.",
+      "No transport unit is considered authoritative over another."
+    ]
+  },
+  "identity_resolution": {
+    "description": "Identity resolution governs how objects from multiple transport units are unified.",
+    "rules": [
+      "The entity-id (UUID or Tag URI) is the authoritative identifier.",
+      "If two transport units refer to the same entity using different forms of its identifier, implementations should resolve them to the same entity where possible.",
+      "If conflicting identity mappings are encountered (e.g., the same entity-id appearing to refer to two distinct things), this is a structural problem and should be reported.",
+      "Implementations must resolve entity-id values to their corresponding entities when possible."
+    ]
+  },
+  "merge_rules": {
+    "description": "Merging behavior is not defined by this specification. How overlapping contributions are combined, prioritized, or reconciled is the responsibility of consuming applications. See m1lattice.merging.guide.v2 for exploratory guidance.",
+    "notes": [
+      "Applications may accumulate, select, annotate, partition, quarantine, or refuse conflicting values.",
+      "A minimal baseline: treat identical values for the same entity and aspect as one; treat differing values as conflicts to be resolved by the application.",
+      "No merge strategy is mandated by M1."
+    ]
+  },
+  "loading_model": {
+    "description": "Defines the conceptual behavior of loading M1 transport units into memory.",
+    "rules": [
+      "Loading produces a merged, identity-indexed view of the data.",
+      "Entities are retrievable by their identifier.",
+      "Aspects are accessible by entity identifier and aspect identifier.",
+      "Tables provide resolution context but do not alter the ontology.",
+      "Implementations are not required to use a specific in-memory structure."
+    ]
+  },
+  "mutation_model": {
+    "description": "Defines how changes are represented in transport units.",
+    "rules": [
+      "Transport units may represent incremental additions to the graph.",
+      "Updates may be expressed by providing new aspect values for existing entities.",
+      "Append-only and layered models are supported but not required.",
+      "Transport format does not prescribe a specific persistence strategy."
+    ]
+  },
   "tables": {
     "description": "Tables provide a mapping from identifiers to resource locations. They are not part of the M1 ontology.",
     "rules": [
@@ -100,5 +132,98 @@
       "Tables may differ across systems without affecting identity.",
       "Transport does not define how table entries are resolved."
     ]
+  },
+  "boundaries": {
+    "description": "Defines how transport units relate to datasets and environments.",
+    "rules": [
+      "Transport units do not define dataset boundaries.",
+      "Datasets are defined by the set of transport units loaded by a system.",
+      "The same transport unit may participate in multiple datasets.",
+      "Systems must not assume completeness of any dataset."
+    ]
+  },
+  "interoperability": {
+    "description": "Defines how systems exchange and interpret transport units.",
+    "rules": [
+      "Systems must recognize the 'm1' header and its version field.",
+      "Systems must support partial data and incremental loading.",
+      "Systems must interoperate via shared identity conventions.",
+      "No shared schema is required beyond m1lattice.spec.core.v2 and this transport specification."
+    ]
+  },
+  "softspec": {
+    "schemas": {
+      "m1_transport_unit": {
+        "title": "M1 Transport Unit",
+        "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects.",
+        "structure": {
+          "type": "object",
+          "keys": {
+            "m1": {
+              "type": "object",
+              "required": true,
+              "description": "Header identifying the file as M1 transport data.",
+              "keys": {
+                "version": {
+                  "type": "string",
+                  "required": true,
+                  "description": "Specifies the version of the M1 transport format.",
+                  "examples": [
+                    "2.0"
+                  ]
+                },
+                "created": {
+                  "type": "timestamp",
+                  "required": false,
+                  "description": "Timestamp indicating when this transport unit was created. Intended for provenance and file-level context."
+                },
+                "author": {
+                  "type": "string",
+                  "required": false,
+                  "description": "A human-readable indication of who created or contributed this transport unit. No formal structure or identifier is required."
+                },
+                "title": {
+                  "type": "string",
+                  "required": false,
+                  "description": "A human-readable title for the transport unit, suitable for display in file browsers or user interfaces."
+                },
+                "description": {
+                  "type": "string",
+                  "required": false,
+                  "description": "A textual description of the transport unit, providing context about its contents or purpose."
+                },
+                "hook": {
+                  "type": "string",
+                  "required": false,
+                  "description": "A concise, attention-directing phrase intended to quickly convey the significance or purpose of the transport unit."
+                }
+              },
+              "additional_keys": true
+            },
+            "entities": {
+              "type": "object",
+              "required": false,
+              "description": "A mapping from entity identifiers to their associated aspects.",
+              "key_type": "entity-id",
+              "value_type": {
+                "type": "object",
+                "description": "A mapping from aspect identifiers to aspect contents.",
+                "key_type": "entity-id",
+                "value_type": {
+                  "type": "object",
+                  "description": "Aspect content. The structure is determined by the aspect identifier.",
+                  "additional_keys": true
+                }
+              }
+            },
+            "table": {
+              "type": "object",
+              "required": false,
+              "description": "Optional mapping of identifiers to resource locations. Structure as defined in m1lattice.spec.core.v2, schema 'table'."
+            }
+          }
+        }
+      }
+    }
   }
 }

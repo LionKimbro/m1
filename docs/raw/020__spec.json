@@ -8,6 +8,9 @@
     "finalized": "2026-04-11",
     "supersedes": [
       "m1lattice.spec.core"
+    ],
+    "builds_on": [
+      "softspec.spec.v2"
     ]
   },
   "core_principle": "The M1 Lattice consists of a set of entities, each identified by a stable identity. All meaning, structure, and relationships are expressed through aspects attached to these entities.",
@@ -29,297 +32,408 @@
     "Recognizes basic aspect convention",
     "Recognizes link aspect convention"
   ],
-  "types": {
-    "description": "Defines the distinction between logical and semantic types in M1 specifications.",
-    "logical_type": "The type as it appears in a JSON document (object, array, string, number, boolean, null). Implementations may further distinguish number into integer and float.",
-    "semantic_type": "A more precise meaning within a logical type, describing how the value should be interpreted.",
-    "semantic_type_inventory": {
-      "entity-id": "A stable identifier for an entity, expressed as either a UUID (RFC 9562) or a Tag URI (RFC 4151).",
-      "timestamp": "An ISO 8601 UTC timestamp (YYYY-MM-DDTHH:MM:SSZ).",
-      "date": "A calendar date (YYYY-MM-DD).",
-      "url": "A valid URL (RFC 3986).",
-      "file-path": "A filesystem path string.",
-      "resource-reference": "A reference to a resource. It is recommended that this be expressed as an entity-id and resolved via tables. Direct references such as URLs or file paths are permitted."
-    },
-    "rules": [
-      "Logical types define storage format.",
-      "Semantic types define interpretation.",
-      "Semantic types are open and may be extended by implementations.",
-      "Semantic types not described in the inventory are intentionally left undefined and may be freely introduced and interpreted by implementations."
-    ]
-  },
-  "entity": {
-    "description": "The entity is the abstract representation of something.  It is uniquely identified by a stable identifier, which may be expressed as a UUID or Tag URI.  The chosen form becomes the permanent identifier of the entity.",
-    "identity": {
-      "logical_type": "string",
-      "semantic_type": "entity-id",
-      "required": true,
-      "description": "Primary identifier for the entity."
-    }
-  },
-  "aspect": {
-    "description": "An aspect is a named structure associated with an entity, representing a dimension of meaning, data, or behavior.",
-    "identity": {
-      "type": "string",
-      "required": true,
-      "description": "Primary identifier for the aspect type (typically a Tag URI)."
-    },
-    "association": {
-      "entity_id": {
+  "softspec": {
+    "types": {
+      "uuid": {
         "type": "string",
-        "required": true,
-        "description": "Identifier of the entity to which this aspect applies."
+        "description": "A globally unique identifier.",
+        "examples": [
+          "550e8400-e29b-41d4-a716-446655440000"
+        ],
+        "notes": [
+          "Typically v4 (random); v5 (name-based) is also acceptable."
+        ],
+        "rfc": "RFC-9562"
+      },
+      "tag-uri": {
+        "type": "string",
+        "description": "A Tag URI, providing a human-meaningful globally unique identifier.",
+        "examples": [
+          "tag:m1lattice.net,2026/aspect/basic"
+        ],
+        "rfc": "RFC-4151"
+      },
+      "entity-id": {
+        "type": [
+          "uuid",
+          "tag-uri"
+        ],
+        "description": "A stable identifier for an entity. May be expressed as a UUID or a Tag URI. Once assigned, it must not change.",
+        "notes": [
+          "The chosen form becomes the permanent identifier of the entity."
+        ]
+      },
+      "timestamp": {
+        "type": "string",
+        "description": "An ISO 8601 UTC timestamp.",
+        "examples": [
+          "2026-04-13T12:00:00Z"
+        ],
+        "constraints": {
+          "format": "date-time"
+        }
+      },
+      "date": {
+        "type": "string",
+        "description": "A calendar date in ISO 8601 format.",
+        "examples": [
+          "2026-04-13"
+        ],
+        "constraints": {
+          "format": "date"
+        }
+      },
+      "url": {
+        "type": "string",
+        "description": "A valid URL.",
+        "examples": [
+          "https://example.com/"
+        ]
+      },
+      "file-path": {
+        "type": "string",
+        "description": "A filesystem path string.",
+        "examples": [
+          "/home/user/documents/file.txt",
+          "C:\\Users\\user\\file.txt"
+        ]
+      },
+      "resource-reference": {
+        "type": [
+          "entity-id",
+          "string"
+        ],
+        "description": "A reference to a resource. Recommended to be expressed as an entity-id and resolved via tables. Direct references such as URLs or file paths are also permitted."
+      },
+      "label": {
+        "type": "string",
+        "description": "A short, human-readable identifier or display name. Typically concise and stable.",
+        "examples": [
+          "my-entity",
+          "Home Page",
+          "v2.0"
+        ]
+      },
+      "text": {
+        "type": "string",
+        "description": "Free-form human-readable text. May range from a short phrase to multiple paragraphs."
+      },
+      "tag": {
+        "type": "string",
+        "description": "A classification label used to group or categorize entities.  Typically with a limited range of characters, and forbidding spaces.",
+        "examples": [
+          "science",
+          "history",
+          "personal"
+        ]
       }
     },
-    "contents": {
-      "type": "object",
-      "required": true,
-      "description": "The structure of the aspect is determined by its identifier. No global schema is enforced."
-    },
-    "rules": [
-      "Aspects represent perspectives or dimensions of meaning associated with an entity.",
-      "Multiple aspects may exist for a single entity.",
-      "Aspects may represent incomplete or conflicting perspectives.",
-      "Interpretation of aspects is the responsibility of consuming systems."
-    ]
-  },
-  "core-aspects": {
-    "basic": {
-      "description": "enables a baseline level of interaction with entities that would otherwise be indecipherable to a given system.",
-      "note": "The basic aspect provides a minimal, broadly interpretable layer of information to support generic browsing and interaction.",
-      "aspect_id": "tag:m1lattice.net,2026/aspect/basic",
-      "content_fields": {
-        "typehint": {
-          "logical_type": "string",
-          "semantic_type": "word",
-          "required": false,
-          "description": "A short, human-readable indication of the entity's general nature. Examples include 'person', 'location', 'book', 'event', 'file', or 'link'. This field is informal and non-authoritative, and is intended to aid presentation, interpretation, and filtering."
-        },
-        "name": {
-          "logical_type": "string",
-          "semantic_type": "label",
-          "required": false,
-          "description": "A short, program-friendly identifier or label for the entity. Typically concise and stable, and may be used in code or compact displays.",
-          "legal_form": "[a-zA-Z][a-zA-Z0-9_-]*"
-        },
-        "title": {
-          "logical_type": "string",
-          "semantic_type": "title",
-          "required": false,
-          "description": "A human-readable title for the entity, suitable for display in user interfaces."
-        },
-        "description": {
-          "logical_type": "string",
-          "semantic_type": "text",
-          "required": false,
-          "description": "A textual explanation of the entity, providing context, meaning, or interpretation. Typically a paragraph long, but could be empty, or could be as long as an essay."
-        },
-        "tags": {
-          "logical_type": "array",
-          "semantic_type": "tag-list",
-          "required": false,
-          "description": "A list of classification labels used to group or categorize the entity.",
-          "items": {
-            "logical_type": "string",
-            "semantic_type": "tag"
-          }
-        },
-        "url": {
-          "logical_type": "string",
-          "semantic_type": "url",
-          "required": false,
-          "description": "A URL associated with the entity, typically pointing to an external resource or canonical reference.",
-          "example": "If the entity is Amazon (the company), the URL entry would likely be 'https://amazon.com'. For a web page bookmark, the url would be the URL of the bookmark."
-        },
-        "file": {
-          "logical_type": "string",
-          "semantic_type": "resource-reference",
-          "required": false,
-          "description": "Reference to a file resource associated with this entity."
-        },
-        "image": {
-          "logical_type": "string",
-          "semantic_type": "resource-reference",
-          "required": false,
-          "description": "Reference to an image resource associated with this entity."
-        },
-        "date": {
-          "logical_type": "string",
-          "semantic_type": "date (non-specific)",
-          "required": false,
-          "description": "A general-purpose date associated with the entity. Interpretation is context-dependent."
-        },
-        "location": {
-          "logical_type": "string",
-          "semantic_type": "location",
-          "required": false,
-          "description": "A general-purpose location associated with the entity. Interpretation is context-dependent."
-        },
-        "notes": {
-          "logical_type": "string",
-          "semantic_type": "text",
-          "required": false,
-          "description": "Free-form notes or additional information about the entity. Intended for informal or unstructured content."
-        },
-        "hook": {
-          "logical_type": "string",
-          "semantic_type": "phrase (non-specific)",
-          "required": false,
-          "description": "A concise, attention-directing expression, often a phrase, intended to quickly convey the entity's significance or invite engagement."
+    "schemas": {
+      "entity": {
+        "title": "Entity Schema",
+        "description": "The entity is the abstract representation of something.  It is uniquely identified by a stable identifier, which may be expressed as a UUID or Tag URI.  The chosen form becomes the permanent identifier of the entity.",
+        "structure": {
+          "type": "entity-id",
+          "required": true,
+          "description": "Primary identifier for the entity."
         }
       },
-      "typing_guidance": [
-        "The 'typehint' field provides a human-readable indication of an entity's general nature.",
-        "Common values may include 'person', 'location', 'book', 'event', or 'link'.",
-        "For entities representing relationships, 'link' is typically used, with more specific relationship semantics defined within the link aspect.",
-        "More specific or structured typing should be expressed through aspects."
-      ],
-      "rules": [
-        "These fields are optional and loosely interpreted.",
-        "They are intended for general usability and human readability.",
-        "They are not authoritative or strictly defined.",
-        "More precise structure should be expressed through specialized aspects."
-      ]
-    },
-    "link": {
-      "description": "Links are expressed as entities that contain a link aspect.",
-      "canonical_aspect": "tag:m1lattice.net,2026/aspect/link",
-      "content_fields": {
-        "from": {
-          "logical_type": "string",
-          "semantic_type": "entity-id",
-          "required": true,
-          "description": "Identifier of the source entity."
-        },
-        "to": {
-          "logical_type": "string",
-          "semantic_type": "entity-id",
-          "required": true,
-          "description": "Identifier of the target entity."
-        },
-        "type": {
-          "logical_type": "string",
-          "semantic_type": "entity-id",
-          "required": false,
-          "description": "Optional identifier of an entity describing the relationship type."
-        },
-        "typehint": {
-          "logical_type": "string",
-          "semantic_type": "label",
-          "required": false,
-          "description": "Human-readable label describing the relationship."
-        }
-      },
-      "rules": [
-        "Links are entities with their own identity.",
-        "A link is recognized by the presence of the link aspect.",
-        "Links are directional, expressed from a source entity to a target entity.",
-        "Multiple links may exist between the same pair of entities.",
-        "Links may include additional aspects beyond the link aspect.",
-        "Links do not have special status in the core model; they are interpreted by convention."
-      ]
-    },
-    "log": {
-      "description": "Logs on entities preserve a common log of activities.",
-      "canonical_aspect": "tag:m1lattice.net,2026/aspect/log",
-      "content_fields": {
-        "log": {
-          "logical_type": "array",
-          "semantic_type": "log-entry-list",
-          "required": true,
-          "ordering": "chronological",
-          "items": {
-            "logical_type": "object",
-            "semantic_type": "log-entry",
-            "structure": "see entry_fields"
-          }
-        }
-      },
-      "entry_fields": {
-        "timestamp": {
-          "logical_type": "string",
-          "semantic_type": "timestamp",
-          "required": true,
-          "description": "the timestamp for this log note"
-        },
-        "event": {
-          "logical_type": "string",
-          "semantic_type": "label",
-          "required": true,
-          "description": "A logged event code. Values are user-defined, but convergence on shared vocabularies is recommended.",
-          "vocabulary": {
-            "CREATED": "The entity was created at this time (as reified M1 data).",
-            "UPDATED": "The entity's data was meaningfully updated at this time.",
-            "ACCESSED": "The entity was notably accessed at this time.",
-            "DEPRECATED": "Use of this entity is discouraged after this time.",
-            "NOTE": "A textual note was written into the log at this time."
-          }
-        },
-        "note": {
-          "logical_type": "string",
-          "semantic_type": "text",
-          "required": false,
-          "description": "Human-readable note associated with this log entry."
-        },
-        "agent": {
-          "logical_type": "string",
-          "semantic_type": "entity-id",
-          "required": false,
-          "description": "Identifier of an entity representing the originator of the action: any entity acting with intent or effect, such as a person, organization, or artificial intelligence system."
-        },
-        "via": {
-          "logical_type": "string",
-          "semantic_type": "entity-id",
-          "required": false,
-          "description": "Identifier of an entity representing the mechanism, tool, or activity through which the action was carried out."
-        }
-      },
-      "rules": [
-        "Log entries are ordered chronologically.",
-        "Logs may merge; entries should endure.",
-        "Entries should be appended; existing entries should not be modified.",
-        "Multiple logs from different sources may coexist.",
-        "Interpretation of events is the responsibility of consuming systems.",
-        "Log entries may be combined from multiple sources into a single log. Individual entries should be preserved and not collapsed.",
-        "Duplicate entries may be eliminated during merging if they are identical."
-      ]
-    }
-  },
-  "tables": {
-    "description": "Tables provide a mapping from identifiers to resource locations. They are not part of the M1 Lattice ontology, but serve as a local resolution layer connecting entities to concrete resources such as files or URLs.",
-    "structure": {
-      "<identifier>": {
-        "type": "array",
-        "description": "A list of locations where a resource matching the referenced identifier may be found.",
-        "items": {
+      "aspect": {
+        "title": "Aspect Schema",
+        "description": "An aspect is a named structure associated with an entity, consisting of an identifier and a content object.  The aspect represents a dimension of meaning, data, or behavior.",
+        "notes": [
+          "Aspects represent perspectives or dimensions of meaning associated with an entity.",
+          "Aspects may represent incomplete or conflicting perspectives.",
+          "An aspect has an identifier that determines its meaning.",
+          "Interpretation of aspects is the responsibility of consuming systems."
+        ],
+        "rules": [
+          "Aspect instances are always attached to a specific entity.",
+          "Multiple aspects may exist for a single entity.",
+          "An aspect always has an identifier.",
+          "The identifier SHOULD be an entity-id.",
+          "It is RECOMMENDED that the identifier be an Tag URI.",
+          "An aspect has a content value, typically a JSON object.",
+          "The structure of the content is defined by the identifier.",
+          "No global schema is enforced for all aspect contents."
+        ],
+        "structure": {
           "type": "object",
-          "fields": {
-            "type": {
-              "type": "string",
-              "required": true,
-              "description": "The type of location. Common values include 'file' and 'url', but the set of valid types is open and may be extended."
-            },
-            "path": {
-              "type": "string",
-              "required": false,
-              "description": "A local filesystem path. Required when type is 'file'."
-            },
-            "url": {
-              "type": "string",
-              "required": false,
-              "description": "A string representing the location value, such as a URL. Required when type is 'url'."
+          "required": true,
+          "description": "Represents the content of an aspect. Aspect content is associated with an aspect identifier and a specific entity. The aspect identifier and entity are represented externally. No global schema is enforced for aspect contents."
+        }
+      },
+      "table": {
+        "title": "Table Schema",
+        "description": "Tables provide a mapping from identifiers to resource locations. They are not part of the M1 Lattice ontology, but serve as a local resolution layer connecting entities to concrete resources such as files or URLs.",
+        "rules": [
+          "Tables map identifiers (entity ids) to zero or more resource locations.",
+          "Identifiers may be expressed as UUIDs or Tag URIs.",
+          "Multiple locations per identifier are allowed and expected.",
+          "Tables are environment-specific and may differ across systems.",
+          "The M1 Lattice specification does not define how a location is selected; this is the responsibility of consuming applications.",
+          "The set of location types is open; implementations may define additional types beyond 'file' and 'url'.",
+          "Tables are not required for operation of the lattice, but provide a mechanism for resolving entities to concrete resources."
+        ],
+        "structure": {
+          "type": "object",
+          "description": "Maps identifiers to lists of resource location objects.",
+          "key_type": "entity-id",
+          "value_type": {
+            "type": "array",
+            "description": "A list of locations where a resource matching the referenced identifier may be found.",
+            "items": {
+              "type": "object",
+              "keys": {
+                "type": {
+                  "type": "string",
+                  "required": true,
+                  "description": "The type of location. Common values include 'file' and 'url', but the set of valid types is open and may be extended."
+                },
+                "path": {
+                  "type": "string",
+                  "required": "when type is 'file'",
+                  "description": "A local filesystem path. Required when type is 'file'."
+                },
+                "url": {
+                  "type": "string",
+                  "required": "when type is 'url'",
+                  "description": "A string representing the location value, such as a URL."
+                }
+              },
+              "additional_keys": true
             }
           }
         }
+      },
+      "basic": {
+        "title": "Basic Aspect",
+        "id": "tag:m1lattice.net,2026/aspect/basic",
+        "description": "The basic aspect provides a minimal, broadly interpretable layer of information to support generic browsing and interaction.",
+        "notes": [
+          "The 'typehint' field provides a human-readable indication of an entity's general nature.",
+          "Common values may include 'person', 'location', 'book', 'event', or 'link'.",
+          "For entities representing relationships, 'link' is typically used, with more specific relationship semantics defined within the link aspect.",
+          "More specific or structured typing should be expressed through aspects."
+        ],
+        "rules": [
+          "These fields are optional and loosely interpreted.",
+          "They are intended for general usability and human readability.",
+          "They are not authoritative or strictly defined.",
+          "More precise structure should be expressed through specialized aspects."
+        ],
+        "structure": {
+          "type": "object",
+          "keys": {
+            "typehint": {
+              "type": "string",
+              "semantic_type": "word",
+              "required": false,
+              "description": "A short, human-readable indication of the entity's general nature. This field is informal and non-authoritative, and is intended to aid presentation, interpretation, and filtering.",
+              "examples": [
+                "person",
+                "location",
+                "book",
+                "event",
+                "file",
+                "link"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "semantic_type": "label",
+              "required": false,
+              "description": "A short, program-friendly identifier or label for the entity. Typically concise and stable, and may be used in code or compact displays.",
+              "constraints": {
+                "pattern": "[a-zA-Z][a-zA-Z0-9_-]*"
+              }
+            },
+            "title": {
+              "type": "string",
+              "semantic_type": "title",
+              "required": false,
+              "description": "A human-readable title for the entity, suitable for display in user interfaces."
+            },
+            "description": {
+              "type": "string",
+              "semantic_type": "text",
+              "required": false,
+              "description": "A textual explanation of the entity, providing context, meaning, or interpretation. Typically a paragraph long, but may be empty or extended."
+            },
+            "tags": {
+              "type": "array",
+              "semantic_type": "tag-list",
+              "required": false,
+              "description": "A list of classification labels used to group or categorize the entity.",
+              "items": {
+                "type": "string",
+                "semantic_type": "tag"
+              }
+            },
+            "url": {
+              "type": "string",
+              "semantic_type": "url",
+              "required": false,
+              "description": "A URL associated with the entity, typically pointing to an external resource or canonical reference.  For example, for a web page bookmark, the url would be the URL of the bookmark.  For an entity representing Amazon (the corporation,) the URL might be https://amazon.com/.",
+              "examples": [
+                "https://example.net/",
+                "https://amazon.com/"
+              ]
+            },
+            "file": {
+              "type": "string",
+              "semantic_type": "resource-reference",
+              "required": false,
+              "description": "Reference to a file resource associated with this entity."
+            },
+            "image": {
+              "type": "string",
+              "semantic_type": "resource-reference",
+              "required": false,
+              "description": "Reference to an image resource associated with this entity."
+            },
+            "date": {
+              "type": "string",
+              "semantic_type": "date (non-specific)",
+              "required": false,
+              "description": "A general-purpose date associated with the entity. Interpretation is context-dependent."
+            },
+            "location": {
+              "type": "string",
+              "semantic_type": "location (non-specific)",
+              "required": false,
+              "description": "A general-purpose location associated with the entity. Interpretation is context-dependent."
+            },
+            "notes": {
+              "type": "string",
+              "semantic_type": "text",
+              "required": false,
+              "description": "Free-form notes or additional information about the entity. Intended for informal or unstructured content."
+            },
+            "hook": {
+              "type": "string",
+              "semantic_type": "phrase (non-specific)",
+              "required": false,
+              "description": "A concise, attention-directing expression, often a phrase, intended to quickly convey the entity's significance or invite engagement."
+            }
+          },
+          "additional_keys": true
+        }
+      },
+      "link": {
+        "title": "Link Aspect",
+        "id": "tag:m1lattice.net,2026/aspect/link",
+        "description": "Links are expressed as entities that contain a link aspect. The link aspect defines a directional relationship between two entities.",
+        "notes": [
+          "Links are entities with their own identity.",
+          "A link is recognized by the presence of the link aspect.",
+          "Links do not have special status in the core model; they are interpreted by convention."
+        ],
+        "rules": [
+          "A link is directional, expressed from a source entity to a target entity.",
+          "The 'from' and 'to' fields identify the source and target entities, respectively.",
+          "Multiple links may exist between the same pair of entities.",
+          "Links may include additional aspects beyond the link aspect."
+        ],
+        "structure": {
+          "type": "object",
+          "keys": {
+            "from": {
+              "type": "entity-id",
+              "required": true,
+              "description": "Identifier of the source entity."
+            },
+            "to": {
+              "type": "entity-id",
+              "required": true,
+              "description": "Identifier of the target entity."
+            },
+            "type": {
+              "type": "entity-id",
+              "required": false,
+              "description": "Optional identifier of an entity describing the relationship type."
+            },
+            "typehint": {
+              "type": "string",
+              "semantic_type": "label",
+              "required": false,
+              "description": "Human-readable label describing the relationship."
+            }
+          },
+          "additional_keys": true
+        }
+      },
+      "log": {
+        "title": "Log Aspect",
+        "id": "tag:m1lattice.net,2026/aspect/log",
+        "description": "Logs on entities preserve a common log of activities.",
+        "notes": [
+          "Logs represent a chronological record of events associated with an entity.",
+          "Multiple logs from different sources may coexist.",
+          "Interpretation of events is the responsibility of consuming systems."
+        ],
+        "rules": [
+          "Log entries are ordered chronologically.",
+          "Entries should be appended; existing entries should not be modified.",
+          "Log entries may be combined from multiple sources into a single log.",
+          "Individual entries should be preserved and not collapsed.",
+          "Duplicate entries must be eliminated during merging if they are identical."
+        ],
+        "structure": {
+          "type": "object",
+          "keys": {
+            "log": {
+              "type": "array",
+              "required": true,
+              "ordering": "chronological",
+              "items": {
+                "type": "object",
+                "semantic_type": "log-entry",
+                "keys": {
+                  "timestamp": {
+                    "type": "string",
+                    "semantic_type": "timestamp",
+                    "required": true,
+                    "description": "The timestamp for this log entry."
+                  },
+                  "event": {
+                    "type": "string",
+                    "semantic_type": "label",
+                    "required": true,
+                    "description": "A logged event code. Values are user-defined, but convergence on shared vocabularies is recommended.",
+                    "vocabulary": {
+                      "CREATED": "The entity was created at this time (as reified M1 data).",
+                      "UPDATED": "The entity's data was meaningfully updated at this time.",
+                      "ACCESSED": "The entity was notably accessed at this time.",
+                      "DEPRECATED": "Use of this entity is discouraged after this time.",
+                      "NOTE": "A textual note was written into the log at this time."
+                    },
+                    "vocabulary_mode": "open"
+                  },
+                  "note": {
+                    "type": "string",
+                    "semantic_type": "text",
+                    "required": false,
+                    "description": "Human-readable note associated with this log entry."
+                  },
+                  "agent": {
+                    "type": "entity-id",
+                    "required": false,
+                    "description": "Identifier of an entity representing the originator of the action: any entity acting with intent or effect, such as a person, organization, or artificial intelligence system."
+                  },
+                  "via": {
+                    "type": "entity-id",
+                    "required": false,
+                    "description": "Identifier of an entity representing the mechanism, tool, or activity through which the action was carried out."
+                  }
+                },
+                "additional_keys": true
+              }
+            }
+          },
+          "additional_keys": true
+        }
       }
-    },
-    "rules": [
-      "Tables map identifiers (entity ids) to zero or more resource locations.  Identifiers may be expressed as UUIDs or Tag URIs.",
-      "Multiple locations per identifier are allowed and expected.",
-      "Tables are environment-specific and may differ across systems.",
-      "The M1 Lattice specification does not define how a location is selected; this is the responsibility of consuming applications.",
-      "The set of location types is open; implementations may define additional types beyond 'file' and 'url'.",
-      "Tables are not required for operation of the lattice, but provide a mechanism for resolving entities to concrete resources."
-    ]
+    }
   }
 }
