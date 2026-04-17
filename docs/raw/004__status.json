@@ -2,128 +2,184 @@
   "document": {
     "document-id": "m1lattice.status",
     "title": "M1 Lattice — Status and Progress Tracking",
-    "tags": ["m1", "status", "tracking", "command-center"],
+    "tags": [
+      "m1",
+      "status",
+      "tracking",
+      "command-center"
+    ],
     "purpose": "Provide a clear, continuously updated map of the current state of the M1 system, including component status, infrastructure readiness, interface development, and next required actions. This document is the execution-facing mirror of progress."
   },
-
   "context": {
     "threads": {
-      "M1-DESIGN": "Philosophy and specification development",
+      "M1-DESIGN": "Philosophy and specification development (v1 era)",
+      "M1-DESIGN-2": "Ongoing design evolution (v2 era)",
       "M1-CMD": "Execution, tracking, and progress management (this document)",
-      "M1-FMT": "Detailed design of Entity, Link, Aspect, Table",
+      "M1-FMT": "Detailed design of Entity/Aspect/Transport structures",
       "M1-*": "Task-specific or topic-specific work threads"
     },
     "paths": {
       "M1-DESIGN": "https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f",
+      "M1-DESIGN-2": "https://chatgpt.com/c/69e06d32-8c68-83e8-aae9-1f0c0e683fcb",
       "M1-CMD": "https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9",
       "M1-FMT": "https://chatgpt.com/c/69c80ea8-d290-83e8-a4ee-29ad24e465e6"
     },
     "principle": "Separate design from execution. This document reflects what is, what is incomplete, and what comes next."
   },
-
   "status_map": {
     "core_documents": {
       "001__philosophy.json": {
         "id": "m1lattice.philosophy",
-        "status": "present",
-        "notes": "Defines the conceptual foundation of the M1 Lattice."
+        "status": "aligned-v2",
+        "notes": "Philosophy updated to reflect transport model, link centrality, and ambiguity→precision gradient."
       },
       "002__spec.json": {
         "id": "m1lattice.spec.core",
-        "status": "stabilized",
-        "notes": "Core data model (Entities, Links, Aspects, Tables) is complete and internally consistent."
+        "status": "superseded-v2",
+        "notes": "v1 core spec complete; v2 model simplifies structure (entities reduced, aspects unified)."
       },
       "003__semantic-examination.json": {
         "id": "m1lattice.semantic-examination",
         "status": "present",
-        "notes": "Explores meaning formation and semantic gradients within the lattice."
+        "notes": "Still relevant; may require reinterpretation under v2 model."
       },
       "004__status.json": {
         "id": "m1lattice.status",
+        "status": "active",
+        "notes": "Command Center tracking document."
+      },
+      "005__conversations.txt": {
+        "id": null,
         "status": "present",
-        "notes": "Clear, continuously updated map of the current state of the M1 system."
+        "notes": "Index of M1 development threads."
+      },
+      "006__python-api.txt": {
+        "id": null,
+        "status": "draft",
+        "notes": "Early sketch of Python API; needs alignment with v2 aspect-centric model."
+      },
+      "007__transport-spec.json": {
+        "id": "m1lattice.spec.transport",
+        "status": "superseded-v2",
+        "notes": "v1 core spec complete; v2 model simplifies structure; merging explicitly externalized."
+      },
+      "020__spec.json": {
+        "id": "m1lattice.spec.core.v2",
+        "status": "final",
+        "notes": "Entities reduced to identity anchors; structure (including links) lives exclusively in aspects."
+      },
+      "021__transport.json": {
+        "id": "m1lattice.transport",
+        "status": "concept-defined",
+        "notes": "v2 transport model defined conceptually as non-authoritative contributions."
+      },
+      "022__link-types.json": {
+        "id": "m1lattice.link-types",
+        "status": "draft",
+        "notes": "Canonical link/aspect vocabulary emerging (including alias-for)."
+      },
+      "023__merging.json": {
+        "id": "m1lattice.merging",
+        "status": "exploratory",
+        "notes": "Defines conflict spectrum and roles (Producer, Resolver, Consumer)."
       }
     },
-
     "model_components": {
       "core_identity": {
-        "status": "stabilized",
-        "notes": "Identity structure is core to Entities, Links, and Aspects."
+        "status": "stabilized-v2",
+        "notes": "Single id model; aliasing expressed via relationships."
       },
       "entities": {
-        "status": "stabilized",
-        "notes": "Entity structure is well defined."
-      },
-      "links": {
-        "status": "stabilized",
-        "notes": "Links defined as first-class relational entities."
+        "status": "minimalized",
+        "notes": "Entities reduced to identity anchors; structure lives in aspects."
       },
       "aspects": {
-        "status": "stabilized",
-        "notes": "Aspects defined as structured, typed perspectives."
+        "status": "primary-structure",
+        "notes": "All meaning and structure expressed via aspects."
+      },
+      "links": {
+        "status": "absorbed-into-aspects",
+        "notes": "No longer primitive; represented as typed aspects (e.g., alias-for)."
       },
       "tables": {
-        "status": "stabilized",
-        "notes": "Tables defined as identifier → location resolution layer."
+        "status": "retained-optional",
+        "notes": "Resolution layer remains external and non-authoritative."
+      },
+      "aliasing": {
+        "status": "defined-initial",
+        "notes": "Alias relationships expressed via canonical aspect (alias-for); resolution behavior remains open."
       }
     },
-
     "infrastructure": {
       "transport_object_storage": {
-        "status": "concept-defined",
-        "notes": "Non-authoritative, identity-merged distributed graph model defined; ready for concrete file implementation."
+        "status": "defined-v2",
+        "notes": "File format simplified to id → aspects; non-authoritative fragments of global dataset."
+      },
+      "merging_model": {
+        "status": "externalized",
+        "notes": "Conflict resolution and merging explicitly delegated to applications."
       },
       "guid_and_tag_uri": {
-        "status": "mostly-solved",
-        "notes": "Mechanisms largely understood; may need formal codification."
+        "status": "transitioning",
+        "notes": "Unified id model adopted; legacy distinction reduced."
       },
       "table_resolution": {
         "status": "mostly-solved",
-        "notes": "Operational understanding exists; requires formal specification."
+        "notes": "Remains application-defined; no change in v2."
       }
     },
-
     "interface": {
       "object_browser": {
         "status": "not-built",
-        "notes": "No dedicated M1 browser yet. projlist/zoo provides a reference model."
+        "notes": "Still open; may be significantly simpler under v2."
       },
       "link_navigation_view": {
         "status": "not-built",
-        "notes": "No interface for traversing links interactively."
+        "notes": "Now effectively aspect traversal."
+      },
+      "resolver_tools": {
+        "status": "not-built",
+        "notes": "Alias resolution and conflict handling tools now required."
       }
     }
   },
-
   "active_focus": {
-    "primary": "Implement transport and loader for M1",
+    "primary": "Bring M1 v2.0 into executable form",
     "supporting": [
-      "Create first M1 transport file",
-      "Implement minimal in-memory loader",
-      "Define initial API surface for entity, aspect, and link access"
+      "Create first real .m1 transport files",
+      "Implement minimal loader for id → aspects structure",
+      "Align Python API with aspect-centric model",
+      "Introduce alias emission (Zoo) and test identity unification"
     ]
   },
-
   "next_steps": [
     {
       "priority": 1,
-      "action": "Create first concrete M1 transport file",
-      "result": "Validated file structure and header format"
+      "action": "Create first concrete .m1 files using v2 transport model",
+      "result": "Validate real-world usability of simplified transport"
     },
     {
       "priority": 2,
-      "action": "Implement minimal loader producing identity-merged in-memory view",
-      "result": "Executable system capable of reading M1 data"
+      "action": "Implement minimal loader (identity-indexed, aspect aggregation)",
+      "result": "Executable system for reading and inspecting M1 data"
     },
     {
       "priority": 3,
-      "action": "Implement initial API (core, aspect, links_to/from, resource)",
-      "result": "Usable interface for interacting with M1 data"
+      "action": "Implement basic API (entity lookup, aspect queries, traversal)",
+      "result": "Usable developer interface"
+    },
+    {
+      "priority": 4,
+      "action": "Emit alias-for relationships from Zoo and observe behavior",
+      "result": "Validation of identity equivalence model"
+    },
+    {
+      "priority": 5,
+      "action": "Prototype simple resolver (alias + conflict inspection)",
+      "result": "Early insight into merging and ambiguity handling"
     }
   ],
-
-  "next-action": "Create first real M1 transport file",
-
+  "next-action": "Create first real .m1 transport file using v2 structure",
   "rules": [
     "This document reflects reality, not intention.",
     "Statuses must be updated as work progresses.",

@@ -11,6 +11,10 @@ M1-CMD (Project Tracking):
 M1-DESIGN (primary design thread):
   https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f
 
+M1-DESIGN-2 (because the work continues, starting with Aliases)
+  includes: -- work on alias modeling
+  https://chatgpt.com/c/69e06d32-8c68-83e8-aae9-1f0c0e683fcb
+
 M1-FMT (core format development):
   - the development of 002__spec.json,
     which includes the definition of Entity, Aspect, Link, and Table
@@ -20,16 +24,25 @@ M1-FMT (core format development):
 Work on the ZOO format code, (adapting to M1,)
   and I realized that the transport spec (#021) was underspecified,
   and came up with a giant to-do list for M1, that I'm working through:
-  https://chatgpt.com/c/69c404cf-2514-83e8-9c9a-362958fa8872
+    "Zoo Project Concept"
+  -> https://chatgpt.com/c/69c404cf-2514-83e8-9c9a-362958fa8872
 
 apply 2026-04-13 changes
   - in the 020-series of documents
   - working on defining the transport spec, adding aliases too, ...
   reason for departure: working to tighten up how we define JSON specs (objects, arrays, ...)
-  https://chatgpt.com/c/69dd27ae-97c4-83e8-a01c-065baa670ba2
+    (note: does NOT appear to be soft-spec)
+  -> https://chatgpt.com/c/69dd27ae-97c4-83e8-a01c-065baa670ba2
 
 DETOUR: work on said soft-schema spec:
-  https://chatgpt.com/c/69dd2a48-1ce4-83e8-bcea-c7d248a12b34
+    "Soft Schema Discussion"
+  -> https://chatgpt.com/c/69dd2a48-1ce4-83e8-bcea-c7d248a12b34
+
+
+2026-04-15
+  Trying to add Aliasing to M1; Needing help locating the right thread:
+    "M1 Aliases Task"
+  -> https://chatgpt.com/c/69e06915-4690-83e8-b2f3-4eb5c5bcb30a
 
 
 == General Conversations ==
