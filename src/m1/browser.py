@@ -240,7 +240,7 @@ def refresh_entity_list():
     g[ENTITY_ROWS] = rows
     replace_listbox("entity_list", [row["label"] for row in rows])
     entity_ids = [row["entity_id"] for row in rows]
-    if g[ENTITY] not in entity_ids:
+    if g[ENTITY] is None:
         g[ENTITY] = entity_ids[0] if entity_ids else None
     select_listbox_row("entity_list", ENTITY_ROWS, g[ENTITY])
 
@@ -412,17 +412,16 @@ def replace_listbox(name, L):
 
 
 def select_listbox_row(name, rows_name, value):
+    w = widgets[name]
+    w.selection_clear(0, tkinter.END)
     if not value:
         return
-    w = widgets[name]
     for i, row in enumerate(g[rows_name]):
         if rows_name == ENTITY_ROWS and row["entity_id"] == value:
-            w.selection_clear(0, tkinter.END)
             w.selection_set(i)
             w.see(i)
             return
         if rows_name == ASPECT_ROWS and row["aspect_id"] == value:
-            w.selection_clear(0, tkinter.END)
             w.selection_set(i)
             w.see(i)
             return
