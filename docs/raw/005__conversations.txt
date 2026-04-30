@@ -22,6 +22,10 @@ Work on the ZOO format code, (adapting to M1,)
   and came up with a giant to-do list for M1, that I'm working through:
   https://chatgpt.com/c/69c404cf-2514-83e8-9c9a-362958fa8872
 
+ZOO part 2:
+  ZOO-M1 (about integrating M1 into Zoo):
+  https://chatgpt.com/c/69e18cc2-881c-83e8-a937-b8a7d7e12e98
+
 apply 2026-04-13 changes
   - in the 020-series of documents
   - working on defining the transport spec, adding aliases too, ...

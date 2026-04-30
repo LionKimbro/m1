@@ -1,0 +1,87 @@
+{
+  "m1": {
+    "version": "2.0",
+    "created": "2026-04-29T20:35:00Z",
+    "author": "Codex",
+    "title": "Programs and Links Test Data",
+    "description": "Test entities for programs, plus link entities connecting people, programs, and languages."
+  },
+  "entities": {
+    "b2c3d4e5-1111-49a0-8b01-555555555555": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "program",
+        "name": "m1",
+        "title": "M1",
+        "description": "A minimal identity-first system for representing entities, aspects, and relationships.",
+        "tags": ["program", "m1", "knowledge-representation"],
+        "hook": "Identity first, structure by aspects."
+      }
+    },
+    "b2c3d4e5-2222-49a0-8b01-666666666666": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "program",
+        "name": "lionscliapp",
+        "title": "lionscliapp",
+        "description": "A framework for building stateful command-line tools with a persistent project directory.",
+        "tags": ["program", "python", "cli"]
+      }
+    },
+    "b2c3d4e5-3333-49a0-8b01-777777777777": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "program",
+        "name": "filetalk",
+        "title": "FileTalk",
+        "description": "A file-based communication style for programs that exchange structured data through the filesystem.",
+        "tags": ["program", "ipc", "filesystem"]
+      }
+    },
+    "c7d8e9f0-1111-4a22-8c01-888888888888": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "link",
+        "name": "lion_works_on_m1",
+        "title": "Lion works on M1"
+      },
+      "tag:m1lattice.net,2026/aspect/link": {
+        "from": "6a1b3d4e-1111-4f1e-9a01-111111111111",
+        "to": "b2c3d4e5-1111-49a0-8b01-555555555555",
+        "typehint": "works-on"
+      }
+    },
+    "c7d8e9f0-2222-4a22-8c01-999999999999": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "link",
+        "name": "m1_implemented_in_python",
+        "title": "M1 is implemented in Python"
+      },
+      "tag:m1lattice.net,2026/aspect/link": {
+        "from": "b2c3d4e5-1111-49a0-8b01-555555555555",
+        "to": "6a1b3d4e-2222-4f1e-9a01-222222222222",
+        "typehint": "implemented-in"
+      }
+    },
+    "c7d8e9f0-3333-4a22-8c01-aaaaaaaaaaaa": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "link",
+        "name": "m1_related_to_filetalk",
+        "title": "M1 is related to FileTalk"
+      },
+      "tag:m1lattice.net,2026/aspect/link": {
+        "from": "b2c3d4e5-1111-49a0-8b01-555555555555",
+        "to": "b2c3d4e5-3333-49a0-8b01-777777777777",
+        "typehint": "related-to"
+      }
+    },
+    "c7d8e9f0-4444-4a22-8c01-bbbbbbbbbbbb": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "link",
+        "name": "lion_works_on_lionscliapp",
+        "title": "Lion works on lionscliapp"
+      },
+      "tag:m1lattice.net,2026/aspect/link": {
+        "from": "6a1b3d4e-1111-4f1e-9a01-111111111111",
+        "to": "b2c3d4e5-2222-49a0-8b01-666666666666",
+        "typehint": "works-on"
+      }
+    }
+  }
+}
