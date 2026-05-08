@@ -1,0 +1,765 @@
+title: M1 Runtime Model Notes
+date: 2026-05-05
+
+
+== Purpose ==
+
+This note captures the intended programmer-facing runtime model for the
+M1 Python module, distinct from the browser.
+
+This note is not yet the formal transport spec.  It is a design note
+for the in-memory model and API.
+
+
+== Core View ==
+
+The system preserves all loaded claims by preserving all loaded M1
+documents in memory.
+
+It ALSO provides a selected current value per:
+
+  entity_id + aspect_id
+
+through a cache and source selection mechanism.
+
+
+== Terminology ==
+
+- UUID is normative.
+- "GUID" should be read as a mistaken way of saying UUID.
+- Aspect identifiers are called aspect_id.
+  - By the M1 model/spec, these may be Tag URIs or other entity-id forms.
+
+
+== Global Structures ==
+
+There are five major runtime structures:
+
+  overlay
+  overlay_headers
+  overlay_table
+  cache
+  source
+  table_cache
+  M1
+  M1_loaded_from
+
+And one ordering structure:
+
+  priority
+
+
+== overlay ==
+
+The overlay represents session contributions / edits to the M1 state.
+
+The overlay is checked BEFORE the priority list.
+
+The overlay is NOT part of the priority list.
+
+Conceptual structure:
+
+  overlay = {
+    "m1": {
+      "id": <uuid or None>,
+      "series_id": <uuid or None>,
+      "created": <timestamp or None>,
+      "timestamp": <timestamp or None>
+    },
+    "entities": {
+      <entity_id>: {
+        <aspect_id>: <aspect_data>
+      }
+    },
+    "table": { ... optional ... }
+  }
+
+Rules:
+
+- When written to disk, overlay MUST have:
+  - m1.id
+  - m1.timestamp
+  - entities
+- entities may be {}.
+- m1.id is bound to the specific emitted transport artifact.
+  - It must never be reused for changed content.
+- m1.series_id is optional and identifies a persistent document-series lineage.
+- m1.created is optional and indicates when the series was created.
+- Every time an .m1 file is output, m1.timestamp is updated to the
+  immediate current timestamp of output.
+- Every time an .m1 file is output, it must receive a fresh UUID in
+  m1.id.
+- table remains an important part of M1 transport.
+  - It is not omitted from the transport model.
+  - It is simply not addressed by this runtime note yet.
+- When set_aspect(...) writes into overlay, overlay id is nullified.
+  - This causes a new UUID to be assigned automatically at write time,
+    unless the programmer manually sets one first.
+- set_uuid(uuid) manually specifies overlay["m1"]["id"] prior to saving.
+- aspect_data may be None.
+  - None is a legitimate aspect value.
+  - It means: this aspect on this entity is explicitly deleted /
+    non-existent.
+  - On amend save, this masks / removes the corresponding aspect in the
+    output file.
+
+
+== overlay_headers ==
+
+overlay_headers contains user-specified header values to apply when
+writing overlay.
+
+Conceptually:
+
+  overlay_headers = {}
+
+and later perhaps:
+
+  overlay_headers = {
+    "series_id": ...,
+    "created": ...,
+    "author": ...,
+    "title": ...,
+    "description": ...,
+    "hook": ...
+  }
+
+Rules:
+
+- overlay_headers starts as an empty dictionary.
+- Header helper functions write into overlay_headers.
+- The intended UUID for the next overlay emission is tracked through
+  overlay_headers, not through a separate mechanism.
+  - In practice, this means the intended emitted UUID is represented as:
+    overlay_headers["id"]
+- On a + write, user-specified header keys in overlay_headers are merged
+  on top of the existing on-disk m1 header.
+- If a key is not specified in overlay_headers, it does not erase what
+  was already there.
+- Runtime-controlled emission fields still receive fresh values at
+  output time:
+  - m1.id
+  - m1.timestamp
+
+
+== overlay_table ==
+
+overlay_table contains session table contributions / edits.
+
+Conceptually:
+
+  overlay_table = {
+    <identifier>: [
+      {<location-object>},
+      ...
+    ]
+  }
+
+Rules:
+
+- overlay_table is separate from entity/aspect overlay content.
+- overlay_table is only loaded or saved when the t flag is present.
+- Table identifiers follow the transport spec:
+  - UUID
+  - or Tag URI
+
+
+
+== cache ==
+
+The cache provides the currently selected aspect value.
+
+  cache = {
+    <entity_id>: {
+      <aspect_id>: <aspect_data>
+    }
+  }
+
+This is a selected view, not the full preservation layer.
+
+
+== table_cache ==
+
+table_cache is the selected visible table-resolution view.
+
+Conceptually:
+
+  table_cache = {
+    <identifier>: [
+      {<location-object>},
+      ...
+    ]
+  }
+
+Rules:
+
+- table_cache works similarly to the entity/aspect cache.
+- overlay_table is consulted before priority.
+- then loaded table contributions are consulted in priority order.
+- When an M1 document with table entries is loaded, do not eagerly
+  recompute those entries in table_cache.
+- Instead, invalidate those identifiers in table_cache by clearing their
+  cache keys.
+
+
+== source ==
+
+The source structure provides the selected M1 source document for each
+cached value.
+
+  source = {
+    <entity_id>: {
+      <aspect_id>: <id>
+    }
+  }
+
+Here, id is the UUID of the M1 document that supplied the selected
+cache value.
+
+
+== M1 ==
+
+All loaded M1 documents are preserved here.
+
+  M1 = {
+    <id>: <m1_document>
+  }
+
+This is the primary claim-preserving layer.
+
+Because all loaded M1 documents remain loaded, all loaded competing
+claims remain preserved.
+
+
+== M1_loaded_from ==
+
+Maps M1 document UUID to the filesystem path it was loaded from.
+
+  M1_loaded_from = {
+    <id>: <path>
+  }
+
+This means:
+
+- where this transport was loaded from
+
+It does NOT mean:
+
+- the eternal home of this identity
+
+Loading rule regarding shared paths:
+
+- without k:
+  - if a new load comes from a path already represented in
+    M1_loaded_from, previously loaded documents from that path are
+    removed before the new document is loaded
+  - assuming success, there is then only one loaded document from that
+    path
+- with k:
+  - previously loaded documents from that path are preserved
+  - multiple loaded documents may therefore coexist with the same
+    loaded_from path
+
+
+== priority ==
+
+priority is the ordered list of loaded M1 documents to consult after
+overlay.
+
+Conceptually:
+
+  priority = [
+    <m1_document>,
+    <m1_document>,
+    ...
+  ]
+
+The overlay is not inside this list.
+
+Whenever priority is rearranged:
+
+- cache is cleared
+- source is cleared
+
+and must be recomputed on demand or by refresh.
+
+
+== Programmer API ==
+
+Primary access pattern:
+
+  target_entity(entity_id)
+  set_aspect(aspect_id, aspect_data)
+  get_aspect(aspect_id)
+
+Notes:
+
+- target_entity(entity_id) establishes the current entity target.
+- set_aspect(aspect_id, aspect_data) writes directly to overlay.
+- get_aspect(aspect_id) reads the current selected value for the
+  targeted entity:
+  - overlay first
+  - then priority in order
+- If the first found value is None, that None is authoritative and
+  searching stops there.
+
+Additional API:
+
+  set_uuid(uuid)
+  get_headers()
+
+set_uuid(uuid) manually sets the intended emitted UUID.
+This is shorthand for setting:
+
+  overlay_headers["id"]
+
+get_headers() returns the currently specified overlay_headers
+dictionary.
+
+
+== Saving and Loading ==
+
+Loading and saving operate on paths and flags.
+
+  load_m1(path, flags="")
+  save_m1(path, flags="")
+
+The overlay is what gets written.
+
+Flags currently established:
+
+  +
+  !
+  -
+  S
+  k
+  O
+  t
+  w
+
+
+== Save Flags ==
+
+These three are mutually exclusive:
+
+  +
+  !
+  -
+
+And these two are mutually exclusive:
+
+  O
+  S
+
+For save:
+
+- O means save overlay only
+- S means save snapshot (the total visible surface)
+- O is the default
+- t means include table contributions in the save
+- w means perform table weeding before the save
+  - w may only be used if t is also present
+
+
+--- + : amend ---
+
+If a file already exists at the target path:
+
+- load that file
+- amend it with overlay
+- write the result back to disk
+
+For header behavior on amend:
+
+- merge user-specified overlay_headers values on top of the existing m1
+  header
+- preserve unspecified existing header values
+- emit a fresh m1.id
+- emit a fresh m1.timestamp
+
+This supports progressive development of an M1 file under edit.
+
+
+--- ! : overwrite ---
+
+Write overlay directly on top of the target path, replacing any
+existing file.
+
+This is appropriate when overlay itself is intended to be the saved
+document.
+
+
+--- - : safe ---
+
+If the target path already exists:
+
+- raise an exception
+- do not write
+
+
+--- O : overlay save ---
+
+Save the overlay only.
+
+This is the default save target.
+
+Without t:
+
+- save only entity/aspect overlay content
+
+With t:
+
+- also save overlay_table contributions
+
+
+--- S : snapshot save ---
+
+Save the total visible surface of the system.
+
+This means:
+
+- for every known entity_id
+- for every known aspect_id on that entity
+- write the currently visible value
+
+Visibility order is:
+
+  overlay first
+  then priority[0]
+  then priority[1]
+  ...
+  then the last priority item
+
+The written snapshot therefore represents the resolved current view of
+the system, not just session edits.
+
+Without t:
+
+- snapshot save includes only entity/aspect surface
+
+With t:
+
+- snapshot save also includes the total visible table surface
+
+
+--- S+ : amend snapshot save ---
+
+If a file already exists at the target path:
+
+- load that file
+- update its M1 contents with what is present in the immediate snapshot
+- write the amended result back to disk
+
+
+--- S! : overwrite snapshot save ---
+
+Write the current snapshot directly over whatever is at the target
+path.
+
+
+--- S- : safe snapshot save ---
+
+If a file already exists at the target path:
+
+- raise an exception
+- refuse to overwrite the file
+
+
+--- k on save ---
+
+No save-time semantics are established here for k.
+
+k is defined for load behavior.
+
+
+== Load Flags ==
+
+Loading also uses:
+
+  +
+  !
+  -
+  O
+  S
+  k
+  t
+  w
+
+These action flags are mutually exclusive:
+
+  +
+  !
+  -
+
+These target-space flags are mutually exclusive:
+
+  O
+  S
+
+For load:
+
+- O means load into overlay
+- S means load as snapshot/world replacement
+- O is the default
+- t means include table contributions in the load
+- w means perform table weeding after the load
+  - w may only be used if t is also present
+
+
+--- O : overlay load ---
+
+Load the input document into overlay.
+
+Without t:
+
+- do not load table contributions
+
+With t:
+
+- also load table contributions into overlay_table
+
+
+--- O! : overwrite overlay ---
+
+Replace overlay contents with the loaded document contents.
+
+
+--- O+ : amend overlay ---
+
+Load additively into overlay.
+
+If the loaded document contains:
+
+  entity_id + aspect_id = None
+
+then that None is loaded as a legitimate covering value into overlay.
+
+
+--- O- : safe overlay load ---
+
+If overlay already contains any entity/aspect entries:
+
+- raise an exception
+- do not load
+
+In other words, safe overlay load requires an empty overlay.
+
+
+--- S : snapshot load ---
+
+Load the input as a world-replacement snapshot.
+
+
+--- S! : overwrite snapshot load ---
+
+Load this snapshot and throw out everything else currently loaded.
+
+This means rebuilding:
+
+- M1
+- priority
+- cache
+- source
+
+Overlay behavior depends on k:
+
+- if k is present: preserve overlay
+- if k is absent: clear overlay
+
+
+--- S+ : amend snapshot load ---
+
+Load this snapshot in the highest priority position, while allowing
+everything else already loaded to remain.
+
+This means:
+
+- add the snapshot to the loaded world
+- place it at highest priority
+- rebuild cache
+- rebuild source
+
+Overlay behavior depends on k:
+
+- if k is present: preserve overlay
+- if k is absent: overlay still remains untouched unless an
+  implementation explicitly defines otherwise
+
+
+--- S- : safe snapshot load ---
+
+Load this snapshot only if no other M1 data has been loaded.
+
+If other M1 data is already loaded:
+
+- raise an exception
+- do not load
+
+
+--- k : keep overlay on load ---
+
+k means:
+
+- whatever load operation is being performed,
+- do not alter overlay
+- and if the path being loaded is already represented in
+  M1_loaded_from, preserve previously loaded documents from that same
+  path rather than removing them first
+
+This is especially relevant with snapshot load.
+
+Example:
+
+  S!k
+
+means:
+
+- replace the loaded-priority world from the snapshot
+- rebuild M1 / priority / cache / source
+- keep overlay unchanged
+- keep previously loaded documents from the same path if such documents
+  exist
+
+If t is present:
+
+- include table contributions in the snapshot load behavior
+
+
+== Ordering ==
+
+Support ordering functions such as:
+
+  order("ts")
+  order("load-order")
+  order([uuid, uuid, ...])
+
+General form:
+
+  order(type, flags="")
+
+If flags contains:
+
+  -
+
+then reverse the implied order.
+
+
+== None Semantics ==
+
+None is a legitimate aspect value.
+
+It is always attached to:
+
+  entity_id + aspect_id
+
+not to an entity in the abstract.
+
+Meaning:
+
+- this aspect on this entity is explicitly absent / deleted
+
+Selection behavior:
+
+- None is a covering / masking value
+- once a None is encountered during overlay / priority search,
+  lookup stops
+- lower-priority M1 documents are not consulted further for that
+  entity_id + aspect_id
+
+Example:
+
+- priority item 1: no value
+- priority item 2: no value
+- priority item 3: None
+- priority item 4: has data
+- priority item 5: has data
+
+Result:
+
+- selected value is None
+- items 4 and 5 are ignored for that entity_id + aspect_id
+
+Intended meanings:
+
+- order("ts")
+  - order by timestamp
+- order("load-order")
+  - order by the order documents were loaded
+- order([uuid, uuid, ...])
+  - explicit ordering by M1 document UUID
+
+
+== Usage Pattern ==
+
+A common expected pattern of use:
+
+  1. Load background M1 files.
+  2. Load the M1 file being edited.
+  3. User edits write into overlay through set_aspect(...).
+  4. User saves back onto the file from step 2 using amend.
+
+
+== On Document Identity ==
+
+Hashing may still be useful for de-duplication.
+
+However, the normative identity of an M1 document in this runtime model
+is its UUID, not its hash.
+
+Reason:
+
+- the M1 file may need to refer to itself
+- a UUID supports this directly
+- a self-hash-based identity is awkward or impossible in the general case
+
+Further:
+
+- an M1 transport UUID identifies a specific published transport unit
+- it is permanently bound to that exact emitted content
+- if content is changed and emitted again, the new emission must have:
+  - a new m1.id
+  - a new m1.created timestamp
+
+This is a publish-once model for transport identity.
+
+
+== Minimum Transport Requirement ==
+
+At minimum, an M1 document, when written, must have:
+
+  m1.id
+  m1.timestamp
+  entities
+
+even if:
+
+  entities == {}
+
+The table section remains valid and important in M1 transport, but is
+now partially addressed here in runtime terms:
+
+- through overlay_table
+- through table_cache
+- through the t flag
+
+Further table-runtime questions may still deserve a dedicated document.
+
+
+== Table Helper ==
+
+  weed_table()
+
+weed_table() checks file-type table entries in overlay_table to see
+whether the referenced filesystem paths still exist.
+
+If a file-type table location no longer exists:
+
+- remove that location from overlay_table
+
+Optional transport header fields of current interest here:
+
+  m1.series_id
+  m1.created
+
+If the current transport already satisfies this minimum, then it is
+acceptable on this point.

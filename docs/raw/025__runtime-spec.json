@@ -1,0 +1,682 @@
+{
+  "document": {
+    "document-id": "m1lattice.runtime.api.v1",
+    "title": "M1 Runtime API Outline",
+    "purpose": "Outline the intended programmer-facing runtime model and API for working with loaded M1 documents, overlay edits, cache selection, sourcing, ordering, loading, and saving.",
+    "version": "v1.0-draft",
+    "status": "draft",
+    "created": "2026-05-07",
+    "builds_on": [
+      "m1lattice.spec.core.v2",
+      "m1lattice.spec.transport.v2"
+    ],
+    "see_also": [
+      "m1lattice.runtime.notes.2026-05-05"
+    ]
+  },
+  "scope": {
+    "description": "This document describes the in-memory runtime model and the API intended for application programmers. It is not the core M1 ontology spec and not the transport spec.",
+    "notes": [
+      "This API is distinct from the browser.",
+      "This API is intended for programs that load, inspect, edit, prioritize, and re-emit M1 data."
+    ]
+  },
+  "terminology": {
+    "uuid": {
+      "status": "normative",
+      "note": "If earlier conversation says GUID, interpret it as UUID."
+    },
+    "aspect_id": {
+      "description": "Identifier of an aspect. In line with the M1 core/transport model, this may be a Tag URI or another entity-id form."
+    }
+  },
+  "design_principles": [
+    "All loaded claims are preserved by preserving all loaded M1 documents in memory.",
+    "The runtime also provides a selected current value per entity_id + aspect_id.",
+    "Overlay is a writable session layer consulted before priority.",
+    "Priority governs document search order after overlay.",
+    "None is a legitimate covering aspect value.",
+    "Document UUID, not file hash, is the normative identity of an M1 document in this runtime model.",
+    "An M1 transport UUID identifies a specific published transport artifact and must not be reused for changed content.",
+    "Hashes may still be useful for deduplication."
+  ],
+  "global_structures": {
+    "overlay": {
+      "description": "Session contributions / edits to M1 state.",
+      "structure": {
+        "m1": {
+          "id": "uuid or null",
+          "series_id": "uuid or null",
+          "created": "timestamp or null",
+          "timestamp": "timestamp or null"
+        },
+        "entities": {
+          "<entity_id>": {
+            "<aspect_id>": "aspect_data or null"
+          }
+        },
+        "table": "optional table section"
+      },
+      "rules": [
+        "Overlay is checked before priority.",
+        "Overlay is not part of the priority list.",
+        "When written, overlay must have m1.id, m1.timestamp, and entities, even if entities is {}.",
+        "m1.id is bound to the specific emitted transport artifact and must not be reused for changed content.",
+        "m1.series_id is optional and identifies a persistent document-series lineage.",
+        "m1.created is optional and indicates when the document series was created.",
+        "Every time an .m1 file is output, m1.timestamp is updated to the immediate current timestamp of output.",
+        "Every time an .m1 file is output, it must receive a fresh UUID in m1.id.",
+        "Table remains a valid and important part of M1 transport, but runtime handling of table is deferred.",
+        "When set_aspect(...) writes into overlay, overlay m1.id is nullified.",
+        "set_uuid(uuid) manually specifies overlay.m1.id.",
+        "Aspect values in overlay may be None and serialize as JSON null."
+      ]
+    },
+    "overlay_headers": {
+      "description": "User-specified header values to apply when writing overlay.",
+      "structure": {
+        "<header_key>": "<header_value>"
+      },
+      "rules": [
+        "overlay_headers starts as an empty dictionary.",
+        "Header helper functions write into overlay_headers.",
+        "The intended UUID for the next overlay emission is tracked in overlay_headers['id'].",
+        "On amend save, overlay_headers is merged on top of the existing on-disk m1 header.",
+        "If a header key is not present in overlay_headers, it does not erase an existing header value.",
+        "Runtime-controlled emission fields still receive fresh output values: m1.id and m1.timestamp."
+      ]
+    },
+    "overlay_table": {
+      "description": "Session table contributions / edits.",
+      "structure": {
+        "<identifier>": [
+          {
+            "<location-object>": "..."
+          }
+        ]
+      },
+      "rules": [
+        "overlay_table is separate from entity/aspect overlay content.",
+        "overlay_table is only loaded or saved when the t flag is present.",
+        "Table identifiers follow the transport spec: UUID or Tag URI."
+      ]
+    },
+    "cache": {
+      "description": "Selected visible aspect value per entity_id + aspect_id.",
+      "structure": {
+        "<entity_id>": {
+          "<aspect_id>": "aspect_data or null"
+        }
+      },
+      "rules": [
+        "Cache is a selected view, not the full preservation layer.",
+        "Cache is derived from overlay plus priority."
+      ]
+    },
+    "table_cache": {
+      "description": "Selected visible table-resolution view.",
+      "structure": {
+        "<identifier>": [
+          {
+            "<location-object>": "..."
+          }
+        ]
+      },
+      "rules": [
+        "table_cache works similarly to the entity/aspect cache.",
+        "overlay_table is consulted before priority.",
+        "Then loaded table contributions are consulted in priority order.",
+        "When an M1 document with table entries is loaded, table_cache for those identifiers is invalidated rather than eagerly recomputed."
+      ]
+    },
+    "source": {
+      "description": "Selected source document per cached aspect value.",
+      "structure": {
+        "<entity_id>": {
+          "<aspect_id>": "<m1_id>"
+        }
+      },
+      "rules": [
+        "Source is a selected view paired with cache.",
+        "Source is derived from overlay plus priority."
+      ]
+    },
+    "M1": {
+      "description": "All loaded M1 documents.",
+      "structure": {
+        "<m1_id>": "<m1_document>"
+      },
+      "rules": [
+        "This is the primary claim-preserving layer.",
+        "Keeping all loaded M1 documents preserves all loaded competing claims."
+      ]
+    },
+    "M1_loaded_from": {
+      "description": "Filesystem path from which each M1 document was loaded.",
+      "structure": {
+        "<m1_id>": "<path>"
+      },
+      "rules": [
+        "loaded_from(m1_id) should remain available as long as that M1 document remains loaded.",
+        "This is load provenance, not an eternal home of identity.",
+        "Without k, if a new load comes from a path already represented here, previously loaded documents from that path are removed before the new one is loaded.",
+        "With k, previously loaded documents from that same path are preserved, so multiple loaded documents may coexist with the same loaded_from path."
+      ]
+    },
+    "priority": {
+      "description": "Ordered list of loaded M1 documents consulted after overlay.",
+      "structure": [
+        "<m1_document>",
+        "<m1_document>"
+      ],
+      "rules": [
+        "Overlay is not inside priority.",
+        "Any rearrangement of priority clears cache and source.",
+        "After rearrangement, cache and source must be recomputed by refresh or on demand."
+      ]
+    }
+  },
+  "selection_model": {
+    "description": "Visible aspect selection uses overlay first, then priority in order.",
+    "lookup_order": [
+      "overlay",
+      "priority[0]",
+      "priority[1]",
+      "priority[2]"
+    ],
+    "selected_views": [
+      "cache",
+      "source"
+    ]
+  },
+  "none_semantics": {
+    "description": "None is a legitimate aspect value.",
+    "applies_to": "entity_id + aspect_id",
+    "meaning": "This aspect on this entity is explicitly absent / deleted.",
+    "rules": [
+      "None is a covering / masking value.",
+      "Once None is encountered during overlay / priority search, lookup stops.",
+      "Lower-priority M1 documents are not consulted further for that entity_id + aspect_id."
+    ],
+    "example": {
+      "priority_1": "no value",
+      "priority_2": "no value",
+      "priority_3": null,
+      "priority_4": {
+        "some": "data"
+      },
+      "priority_5": {
+        "other": "data"
+      },
+      "result": null
+    }
+  },
+  "api": {
+    "targeting": [
+      {
+        "name": "target_entity",
+        "signature": "target_entity(entity_id)",
+        "description": "Set the current target entity."
+      },
+      {
+        "name": "get_entity",
+        "signature": "get_entity() -> entity_id | None",
+        "description": "Return the current target entity."
+      },
+      {
+        "name": "clear_target",
+        "signature": "clear_target()",
+        "description": "Clear the current target entity."
+      }
+    ],
+    "entity_aspect_access": [
+      {
+        "name": "get_aspect",
+        "signature": "get_aspect(aspect_id) -> aspect_data | None",
+        "description": "Return the selected visible value for aspect_id on the targeted entity.",
+        "rules": [
+          "Consult overlay first, then priority in order.",
+          "May return None as a legitimate selected tombstone value."
+        ]
+      },
+      {
+        "name": "set_aspect",
+        "signature": "set_aspect(aspect_id, aspect_data)",
+        "description": "Write directly to overlay for the targeted entity.",
+        "rules": [
+          "aspect_data may be None.",
+          "Any call to set_aspect nullifies overlay.id.",
+          "set_aspect immediately updates cache for the targeted entity_id + aspect_id.",
+          "set_aspect immediately updates source for the targeted entity_id + aspect_id, with overlay as the effective source layer."
+        ]
+      },
+      {
+        "name": "list_entities",
+        "signature": "list_entities() -> [entity_id, ...]",
+        "description": "Return the total visible surface of entities known about."
+      },
+      {
+        "name": "list_aspects",
+        "signature": "list_aspects() -> [aspect_id, ...]",
+        "description": "Return visible aspects on the targeted entity, excluding aspects masked to None."
+      },
+      {
+        "name": "list_aspects",
+        "signature": "list_aspects(\"*\") -> [aspect_id, ...]",
+        "description": "Return all known aspects on the targeted entity, including aspects set to None."
+      },
+      {
+        "name": "has_entity",
+        "signature": "has_entity(entity_id) -> bool",
+        "description": "Return whether the entity is known on the visible surface."
+      },
+      {
+        "name": "has_aspect",
+        "signature": "has_aspect(aspect_id) -> bool",
+        "description": "Return whether the targeted entity has a visible non-None value for the aspect."
+      },
+      {
+        "name": "has_aspect",
+        "signature": "has_aspect(aspect_id, \"*\") -> bool",
+        "description": "Return whether the targeted entity has any presence for the aspect, including a None tombstone."
+      },
+      {
+        "name": "get_surface",
+        "signature": "get_surface() -> {aspect_id: aspect_data, ...}",
+        "description": "Return the visible aspect surface of the targeted entity, excluding None-masked aspects."
+      },
+      {
+        "name": "get_surface",
+        "signature": "get_surface(\"*\") -> {aspect_id: aspect_data_or_none, ...}",
+        "description": "Return the full aspect surface of the targeted entity, including None tombstones."
+      }
+    ],
+    "sourcing": [
+      {
+        "name": "source_aspect",
+        "signature": "source_aspect(aspect_id) -> m1_id | None",
+        "description": "Return the UUID of the M1 document that currently supplies the selected visible value for the targeted entity's aspect."
+      },
+      {
+        "name": "loaded_from",
+        "signature": "loaded_from(m1_id) -> path | None",
+        "description": "Return the filesystem path from which the M1 document was loaded."
+      }
+    ],
+    "m1_documents": [
+      {
+        "name": "list_m1",
+        "signature": "list_m1() -> [m1_id, ...]",
+        "description": "Return UUIDs of all loaded M1 documents."
+      },
+      {
+        "name": "get_m1",
+        "signature": "get_m1(m1_id) -> m1_document",
+        "description": "Return the in-memory M1 document."
+      },
+      {
+        "name": "has_m1",
+        "signature": "has_m1(m1_id) -> bool",
+        "description": "Return whether the M1 document is loaded."
+      },
+      {
+        "name": "drop_m1",
+        "signature": "drop_m1(m1_id)",
+        "description": "Drop one loaded M1 document.",
+        "rules": [
+          "Calls clear_cache(m1_id).",
+          "Removes the document from M1.",
+          "Removes the path from M1_loaded_from.",
+          "Removes the document from priority."
+        ]
+      },
+      {
+        "name": "drop_m1",
+        "signature": "drop_m1(\"all\")",
+        "description": "Drop all loaded M1 documents.",
+        "rules": [
+          "Clears M1.",
+          "Clears M1_loaded_from.",
+          "Clears priority.",
+          "Clears derived cache and source state.",
+          "Preserves overlay."
+        ]
+      }
+    ],
+    "overlay": [
+      {
+        "name": "get_overlay",
+        "signature": "get_overlay() -> overlay_dict",
+        "description": "Return the overlay structure."
+      },
+      {
+        "name": "clear_overlay",
+        "signature": "clear_overlay()",
+        "description": "Clear overlay entries and overlay metadata."
+      },
+      {
+        "name": "set_uuid",
+        "signature": "set_uuid(uuid)",
+        "description": "Manually set the intended emitted UUID for overlay by writing overlay_headers['id']."
+      },
+      {
+        "name": "get_headers",
+        "signature": "get_headers() -> headers_dict",
+        "description": "Return the current overlay_headers dictionary."
+      },
+      {
+        "name": "stamp_creation",
+        "signature": "stamp_creation()",
+        "description": "Set overlay.m1.created to the immediate current timestamp.",
+        "rules": [
+          "This is used to mark the creation time of a document series."
+        ]
+      },
+      {
+        "name": "set_author",
+        "signature": "set_author(author)",
+        "description": "Set overlay.m1.author."
+      },
+      {
+        "name": "set_title",
+        "signature": "set_title(title)",
+        "description": "Set overlay.m1.title."
+      },
+      {
+        "name": "set_description",
+        "signature": "set_description(description)",
+        "description": "Set overlay.m1.description."
+      },
+      {
+        "name": "set_hook",
+        "signature": "set_hook(hook)",
+        "description": "Set overlay.m1.hook."
+      },
+      {
+        "name": "set_headers",
+        "signature": "set_headers(headers_dict)",
+        "description": "Directly specify additional or replacement header dictionary values to write into overlay.m1.",
+        "rules": [
+          "This function writes into overlay_headers.",
+          "m1.timestamp remains runtime-controlled at write time.",
+          "The intended emitted UUID may be specified through the id header key."
+        ]
+      },
+      {
+        "name": "weed_table",
+        "signature": "weed_table()",
+        "description": "Inspect file-type entries in overlay_table and remove those whose filesystem paths no longer exist."
+      }
+    ],
+    "loading_saving": [
+      {
+        "name": "load_m1",
+        "signature": "load_m1(path, flags=\"\")",
+        "description": "Load an M1 file according to target-space and action flags."
+      },
+      {
+        "name": "save_m1",
+        "signature": "save_m1(path, flags=\"\")",
+        "description": "Save either overlay or snapshot according to target-space and action flags."
+      }
+    ],
+    "priority_ordering": [
+      {
+        "name": "list_priority",
+        "signature": "list_priority() -> [m1_id, ...]",
+        "description": "Return M1 UUIDs in current search order."
+      },
+      {
+        "name": "order",
+        "signature": "order(type, flags=\"\")",
+        "description": "Reorder priority. Any rearrangement clears cache and source."
+      },
+      {
+        "name": "order",
+        "signature": "order(\"ts\", flags=\"\")",
+        "description": "Order by timestamp."
+      },
+      {
+        "name": "order",
+        "signature": "order(\"load-order\", flags=\"\")",
+        "description": "Order by document load order."
+      },
+      {
+        "name": "order",
+        "signature": "order([uuid, uuid, ...], flags=\"\")",
+        "description": "Set explicit priority order by M1 UUID."
+      },
+      {
+        "name": "order",
+        "signature": "order(type, flags=\"-\")",
+        "description": "Reverse whatever ordering the requested type would otherwise imply."
+      }
+    ],
+    "cache_rebuild": [
+      {
+        "name": "clear_cache",
+        "signature": "clear_cache()",
+        "description": "Clear all derived selected cache values and per-aspect selected sourcing."
+      },
+      {
+        "name": "clear_cache",
+        "signature": "clear_cache(m1_id)",
+        "description": "Clear cache/source entries for every entity_id + aspect_id where the given M1 document has any presence, including None."
+      },
+      {
+        "name": "clear_cache",
+        "signature": "clear_cache(\"overlay\")",
+        "description": "Clear cache/source entries for every entity_id + aspect_id where overlay has any presence, including None."
+      },
+      {
+        "name": "refresh",
+        "signature": "refresh()",
+        "description": "Rebuild selected cache/source from overlay plus priority, and rebuild table_cache from overlay_table plus priority table contributions."
+      }
+    ]
+  },
+  "flags": {
+    "save": {
+      "target_flags": {
+        "O": {
+          "description": "Save overlay only.",
+          "default": true
+        },
+        "S": {
+          "description": "Save snapshot: the total visible surface of all known entities/aspects."
+        }
+      },
+      "action_flags": {
+        "+": {
+          "description": "Amend save. If target file exists, load it, amend it with overlay/snapshot content, and write back.",
+          "rules": [
+            "When amending, merge user-specified overlay_headers values on top of the existing m1 header.",
+            "If a header key is not specified in overlay_headers, do not erase the existing value.",
+            "The emitted result receives a fresh m1.id and a fresh m1.timestamp."
+          ]
+        },
+        "!": {
+          "description": "Overwrite save. Write directly over existing file."
+        },
+        "-": {
+          "description": "Safe save. If target exists, raise and do not write."
+        }
+      },
+      "other_flags": {
+        "k": {
+          "description": "No established save-time semantics."
+        },
+        "t": {
+          "description": "Include table contributions in the save."
+        },
+        "w": {
+          "description": "Perform table weeding before the save. May only be used if t is also present."
+        }
+      },
+      "rules": [
+        "O and S are mutually exclusive.",
+        "+, !, and - are mutually exclusive.",
+        "Snapshot save writes the currently visible value for every known entity/aspect using overlay first, then priority in order.",
+        "Without t, save does not include table contributions.",
+        "With t, overlay save includes overlay_table contributions, and snapshot save includes the total visible table surface.",
+        "w may only be used if t is also present.",
+        "With w, perform weed_table() before the save."
+      ],
+      "defined_cases": {
+        "S+": {
+          "description": "Amending snapshot save.",
+          "rules": [
+            "If a file already exists at the target path, load that file.",
+            "Update its M1 contents with what is present in the immediate snapshot.",
+            "Merge user-specified overlay_headers values on top of the existing m1 header.",
+            "If a header key is not specified in overlay_headers, do not erase the existing value.",
+            "The emitted result receives a fresh m1.id and a fresh m1.timestamp.",
+            "Write the amended result back to disk."
+          ]
+        },
+        "S-": {
+          "description": "Safe snapshot save.",
+          "rules": [
+            "If a file already exists at the target path, raise an exception.",
+            "Do not overwrite the existing file."
+          ]
+        },
+        "S!": {
+          "description": "Overwrite snapshot save.",
+          "rules": [
+            "Write the current snapshot directly over whatever is at the target path."
+          ]
+        }
+      },
+      "notes": [
+        "O+ / O! / O- and S+ / S! / S- are the concrete save combinations."
+      ]
+    },
+    "load": {
+      "target_flags": {
+        "O": {
+          "description": "Load into overlay.",
+          "default": true
+        },
+        "S": {
+          "description": "Load as snapshot / world replacement."
+        }
+      },
+      "action_flags": {
+        "+": {
+          "description": "Additive load."
+        },
+        "!": {
+          "description": "Overwrite load."
+        },
+        "-": {
+          "description": "Safe load."
+        }
+      },
+      "other_flags": {
+        "k": {
+          "description": "Keep existing state during load: preserve overlay, and preserve previously loaded documents from the same path."
+        },
+        "t": {
+          "description": "Include table contributions in the load."
+        },
+        "w": {
+          "description": "Perform table weeding after the load. May only be used if t is also present."
+        }
+      },
+      "defined_cases": {
+        "O!": {
+          "description": "Replace overlay contents with the loaded document contents."
+        },
+        "O+": {
+          "description": "Load additively into overlay.",
+          "notes": [
+            "None values are preserved as legitimate covering values."
+          ]
+        },
+        "O-": {
+          "description": "Safe overlay load.",
+          "rules": [
+            "If overlay already contains any entity/aspect entries, raise and do not load."
+          ]
+        },
+        "S!": {
+          "description": "Replace the currently loaded world with the snapshot.",
+          "rules": [
+            "Rebuild M1.",
+            "Rebuild priority.",
+            "Rebuild cache.",
+            "Rebuild source.",
+            "If k is absent: clear overlay.",
+            "If k is present: preserve overlay."
+          ]
+        },
+        "S+": {
+          "description": "Load the snapshot in the highest priority position while allowing everything else already loaded to remain.",
+          "rules": [
+            "Add the snapshot to the loaded world.",
+            "Place it at highest priority.",
+            "Rebuild cache.",
+            "Rebuild source."
+          ]
+        },
+        "S-": {
+          "description": "Load the snapshot only if no other M1 data has been loaded.",
+          "rules": [
+            "If other M1 data is already loaded, raise and do not load."
+          ]
+        },
+        "S!k": {
+          "description": "Replace the loaded-priority world from the snapshot while keeping overlay unchanged."
+        }
+      },
+      "rules": [
+        "O and S are mutually exclusive.",
+        "+, !, and - are mutually exclusive.",
+        "Without k, a successful load leaves at most one currently loaded document from the loaded path.",
+        "With k, multiple loaded documents may coexist from the same loaded path.",
+        "Without t, load does not include table contributions.",
+        "With t, table contributions are loaded through overlay_table / priority and invalidate affected table_cache identifiers.",
+        "w may only be used if t is also present.",
+        "With w, perform weed_table() after the load."
+      ]
+    }
+  },
+  "written_m1_minimum": {
+    "description": "Any written M1 document must meet this minimum.",
+    "required_keys": [
+      "m1.id",
+      "m1.timestamp",
+      "entities"
+    ],
+    "notes": [
+      "entities may be {}.",
+      "m1.series_id is optional.",
+      "m1.created is optional.",
+      "table remains valid and important in transport, but is not yet specified here in runtime terms.",
+      "This is a runtime minimum stated in the language of the current transport shape. It does not yet claim to replace the formal transport spec."
+    ]
+  },
+  "common_usage_pattern": [
+    "Load background M1 files.",
+    "Load the M1 file being edited.",
+    "Target an entity.",
+    "Call set_aspect(...) to write edits into overlay.",
+    "Save back to the edited file using amend-style save."
+  ],
+  "transport_identity_model": {
+    "description": "Transport identity is publish-once.",
+    "rules": [
+      "m1.id identifies a specific emitted transport artifact.",
+      "If content changes and is emitted again, the new emission must receive a new m1.id.",
+      "If content changes and is emitted again, the new emission must receive a new m1.timestamp.",
+      "m1.series_id may remain stable across multiple emissions in the same document series.",
+      "m1.created may remain stable as the creation time of that series.",
+      "The same filesystem path may therefore hold different transport UUIDs over time."
+    ]
+  },
+  "open_points": [
+    "How this runtime minimum for written M1 documents should integrate with the formal transport spec remains to be settled.",
+    "Further table-runtime details beyond overlay_table, table_cache, t-flag behavior, and weed_table() may still deserve a dedicated document."
+  ]
+}

@@ -1,7 +1,10 @@
 {
   "m1": {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "series_id": "10000000-0000-4000-8000-100000000001",
     "version": "2.0",
     "created": "2026-04-29T20:30:00Z",
+    "timestamp": "2026-05-07T20:30:00Z",
     "author": "Codex",
     "title": "People and Languages Test Data",
     "description": "Small M1 test data set covering Lion Kimbro and a few programming languages."

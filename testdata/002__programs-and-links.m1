@@ -1,7 +1,10 @@
 {
   "m1": {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "series_id": "10000000-0000-4000-8000-100000000002",
     "version": "2.0",
     "created": "2026-04-29T20:35:00Z",
+    "timestamp": "2026-05-07T20:35:00Z",
     "author": "Codex",
     "title": "Programs and Links Test Data",
     "description": "Test entities for programs, plus link entities connecting people, programs, and languages."

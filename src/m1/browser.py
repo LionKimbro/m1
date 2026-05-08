@@ -243,6 +243,7 @@ def refresh_entity_list():
     if g[ENTITY] is None:
         g[ENTITY] = entity_ids[0] if entity_ids else None
     select_listbox_row("entity_list", ENTITY_ROWS, g[ENTITY])
+    update_hidden_entity_status(entity_ids)
 
 
 def refresh_aspect_list():
@@ -583,6 +584,16 @@ def navigate_to_entity(entity_id):
     refresh_detail_panes()
     refresh_links_text()
     set_status("Navigated to %s" % entity_id)
+
+
+def update_hidden_entity_status(entity_ids):
+    if g[ENTITY] is None:
+        return
+    if g[ENTITY] in entity_ids:
+        return
+    if not m1.has_entity(g[ENTITY]):
+        return
+    set_status("Viewing hidden entity: %s" % get_entity_label(g[ENTITY]))
 
 
 if __name__ == "__main__":
