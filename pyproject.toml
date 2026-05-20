@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "m1"
+version = "0.1.0"
+description = "Claimspace-focused reader for M1 transport files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "CC0-1.0"}
+authors = [
+  {name = "Lion Kimbro"}
+]
+dependencies = [
+  "lionscliapp>=0.1.0",
+]
+
+[project.scripts]
+m1-browser = "m1.browser:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

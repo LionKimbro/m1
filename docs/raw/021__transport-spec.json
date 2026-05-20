@@ -49,6 +49,10 @@
     "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects. It represents a partial contribution to the M1 Lattice. See the softspec schema 'transport_unit' for the formal structure.",
     "rules": [
       "All top-level sections are optional except the 'm1' header.",
+      "The m1 header must include an id identifying the transport unit itself.",
+      "The m1 header may include a series_id identifying a persistent document-series lineage.",
+      "The m1 header may include a created timestamp indicating when the document series was created.",
+      "The m1 header must include a timestamp indicating the current emission time of the transport unit.",
       "A transport unit may contain any subset of entities and aspects.",
       "Multiple transport units may contribute data about the same entity.",
       "Transport units are not required to be complete or self-contained."
@@ -164,6 +168,16 @@
               "required": true,
               "description": "Header identifying the file as M1 transport data.",
               "keys": {
+                "id": {
+                  "type": "uuid",
+                  "required": true,
+                  "description": "UUID identifying this transport unit itself. This identifier is bound to this specific emitted transport artifact and must not be reused for changed content."
+                },
+                "series_id": {
+                  "type": "uuid",
+                  "required": false,
+                  "description": "Optional UUID identifying the persistent document series or lineage to which this emitted transport unit belongs."
+                },
                 "version": {
                   "type": "string",
                   "required": true,
@@ -175,7 +189,12 @@
                 "created": {
                   "type": "timestamp",
                   "required": false,
-                  "description": "Timestamp indicating when this transport unit was created. Intended for provenance and file-level context."
+                  "description": "Optional timestamp indicating when the document series was originally created."
+                },
+                "timestamp": {
+                  "type": "timestamp",
+                  "required": true,
+                  "description": "Timestamp indicating when this transport unit was emitted. This value is updated whenever the transport unit is written. A changed re-emission must receive both a new id and a new timestamp."
                 },
                 "author": {
                   "type": "string",

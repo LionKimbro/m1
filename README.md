@@ -64,6 +64,8 @@ Rather than fixed schemas, M1 uses **aspects**:
 * attachable
 * independent
 
+They are like little JSON files that you attach to an entity.
+
 An entity may have many aspects, or none.
 
 This allows the same entity to participate in multiple systems without being redefined.

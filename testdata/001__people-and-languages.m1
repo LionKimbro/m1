@@ -1,0 +1,51 @@
+{
+  "m1": {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "series_id": "10000000-0000-4000-8000-100000000001",
+    "version": "2.0",
+    "created": "2026-04-29T20:30:00Z",
+    "timestamp": "2026-05-07T20:30:00Z",
+    "author": "Codex",
+    "title": "People and Languages Test Data",
+    "description": "Small M1 test data set covering Lion Kimbro and a few programming languages."
+  },
+  "entities": {
+    "6a1b3d4e-1111-4f1e-9a01-111111111111": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "person",
+        "name": "lion_kimbro",
+        "title": "Lion Kimbro",
+        "description": "Programmer, designer, and the primary human associated with this test data set.",
+        "tags": ["person", "programmer", "designer"],
+        "hook": "Person behind many of the systems described in these repositories."
+      }
+    },
+    "6a1b3d4e-2222-4f1e-9a01-222222222222": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "programming-language",
+        "name": "python",
+        "title": "Python",
+        "description": "A general-purpose programming language often used for tools, automation, and glue code.",
+        "tags": ["language", "programming", "python"]
+      }
+    },
+    "6a1b3d4e-3333-4f1e-9a01-333333333333": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "programming-language",
+        "name": "common_lisp",
+        "title": "Common Lisp",
+        "description": "A programmable programming language with a long tradition of symbolic and interactive computing.",
+        "tags": ["language", "programming", "lisp"]
+      }
+    },
+    "6a1b3d4e-4444-4f1e-9a01-444444444444": {
+      "tag:m1lattice.net,2026/aspect/basic": {
+        "typehint": "programming-language",
+        "name": "c",
+        "title": "C",
+        "description": "A low-level systems programming language with a small core and broad influence.",
+        "tags": ["language", "programming", "systems"]
+      }
+    }
+  }
+}
