@@ -5,7 +5,8 @@
     "purpose": "Provides exploratory guidance for combining M1 transport units. This document reflects early understanding and is expected to evolve with practical experience.",
     "version": "v2.0",
     "status": "exploratory",
-    "created": "2026-04-11"
+    "created": "2026-04-11",
+    "amended": "2026-06-18"
   },
   "core_statement": "Merging behavior is not defined by the M1 specification. Applications determine how data is combined, interpreted, or rejected.",
   "status_note": {
@@ -80,6 +81,22 @@
     "notes": [
       "Applications may interpret logs differently depending on their needs.",
       "Logs provide context but do not enforce resolution."
+    ]
+  },
+  "entity_tombstone_model": {
+    "description": "The conventional entity tombstone aspect is a contribution asserting whole-entity absence at a layer.",
+    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "principles": [
+      "An entity tombstone participates in reconciliation as explicit data; omission does not.",
+      "In an ordered layered view, the selected active tombstone establishes a cutoff for ordinary aspects of that entity.",
+      "Contributions above the cutoff may reintroduce the entity.",
+      "Contributions at or below the cutoff remain preserved but are not visible in that selected view.",
+      "A tombstone does not invalidate references to the entity identifier."
+    ],
+    "conflict_notes": [
+      "An active tombstone and ordinary aspects contributed for the same entity by the same transport are contradictory.",
+      "Different applications may select, annotate, quarantine, or refuse competing tombstone and non-tombstone contributions.",
+      "A snapshot intended to preserve layered behavior must retain the selected tombstone claim rather than merely omit the entity."
     ]
   },
   "merging_baseline": {

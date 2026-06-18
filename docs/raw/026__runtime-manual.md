@@ -41,6 +41,14 @@ If that value is `None`, that also wins.
 
 Once `None` is encountered, lower-priority M1 documents are not consulted for that aspect.
 
+M1 also defines a conventional whole-entity tombstone aspect:
+
+```text
+tag:m1lattice.net,2026/aspect/tombstone
+```
+
+An active value such as `{"entity": true}` establishes an entity-wide cutoff. The tombstone's own layer and lower-priority layers do not contribute visible aspects for that entity. Higher-priority layers may still reintroduce it.
+
 ## The Runtime Data Structures
 
 The runtime keeps several global structures.
@@ -270,6 +278,42 @@ m1.set_aspect(m1_basic, {
 
 m1.set_aspect("tag:example.org,2026:aspect/obsolete-note", None)
 ```
+
+### Tombstoning A Whole Entity
+
+The intended convenience API is:
+
+```python
+m1.target_entity(entity_id)
+m1.tombstone_entity({
+    "reason": "Removed from this layered view."
+})
+```
+
+This writes the conventional aspect:
+
+```json
+{
+  "tag:m1lattice.net,2026/aspect/tombstone": {
+    "entity": true,
+    "reason": "Removed from this layered view."
+  }
+}
+```
+
+The same result may be expressed directly with `set_aspect(...)`.
+
+An entity tombstone:
+
+- covers all ordinary aspects in its own layer and lower-priority layers
+- does not cover higher-priority contributions
+- does not destroy the UUID
+- does not invalidate links or other references
+- is not the same as omitting the UUID from a saved transport
+
+Snapshot saving must retain the selected tombstone aspect while excluding the ordinary aspects it covers. Merely leaving the UUID out would lose the explicit absence assertion and could allow lower layers to reappear when the snapshot is loaded with other data.
+
+The current Python implementation predates this specification amendment and does not yet apply entity-wide tombstone selection semantics.
 
 ### Listing Entities
 
@@ -554,6 +598,10 @@ You are saying:
 That explicit absence covers lower-priority definitions.
 
 This applies both in runtime and in serialized transport, where `None` becomes JSON `null`.
+
+For whole-entity absence, use the conventional entity tombstone aspect rather than setting every known aspect to `None`. Setting every known aspect to `None` cannot cover an unknown aspect that appears only in a lower layer.
+
+An entity tombstone is positive information carried by the transport. By contrast, omitting an entity from a save emits no information about that UUID. These operations must remain distinct.
 
 ## Tables
 

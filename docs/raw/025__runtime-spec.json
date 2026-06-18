@@ -6,6 +6,7 @@
     "version": "v1.0-draft",
     "status": "draft",
     "created": "2026-05-07",
+    "amended": "2026-06-18",
     "builds_on": [
       "m1lattice.spec.core.v2",
       "m1lattice.spec.transport.v2"
@@ -36,6 +37,7 @@
     "Overlay is a writable session layer consulted before priority.",
     "Priority governs document search order after overlay.",
     "None is a legitimate covering aspect value.",
+    "The conventional entity tombstone aspect is a covering value for an entire entity.",
     "Document UUID, not file hash, is the normative identity of an M1 document in this runtime model.",
     "An M1 transport UUID identifies a specific published transport artifact and must not be reused for changed content.",
     "Hashes may still be useful for deduplication."
@@ -177,7 +179,7 @@
     }
   },
   "selection_model": {
-    "description": "Visible aspect selection uses overlay first, then priority in order.",
+    "description": "Visible aspect selection uses overlay first, then priority in order, subject to an entity-wide cutoff established by the selected entity tombstone aspect.",
     "lookup_order": [
       "overlay",
       "priority[0]",
@@ -187,6 +189,16 @@
     "selected_views": [
       "cache",
       "source"
+    ],
+    "entity_tombstone_rules": [
+      "First resolve tag:m1lattice.net,2026/aspect/tombstone using ordinary aspect selection.",
+      "If its selected value is null, lower-priority tombstone assertions are covered and no entity-wide cutoff is active.",
+      "If its selected value is an object whose 'entity' field is true, its source layer establishes the entity-wide cutoff.",
+      "Ordinary aspects may be selected only from layers above the cutoff.",
+      "Ordinary aspects in the tombstone's own layer and all lower-priority layers are covered.",
+      "An explicit entity contribution in a higher-priority layer reintroduces the entity, but does not expose aspects from at or below the cutoff.",
+      "If no higher-priority layer reintroduces the entity, the entity is absent from the visible entity surface.",
+      "Raw loaded documents and their tombstone claims remain preserved."
     ]
   },
   "none_semantics": {
@@ -210,6 +222,22 @@
       },
       "result": null
     }
+  },
+  "entity_tombstone_semantics": {
+    "description": "The conventional entity tombstone aspect expresses whole-entity absence in a layered view.",
+    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "active_value": {
+      "entity": true
+    },
+    "meaning": "This entity is explicitly absent at this layer; its own-layer and lower-priority contributions are covered.",
+    "rules": [
+      "The tombstone is represented as an aspect, not as a null entity entry.",
+      "It does not destroy the entity identifier or remove preserved source documents.",
+      "It does not invalidate links or other references to the identifier.",
+      "A higher-priority null value for the tombstone aspect covers the tombstone assertion itself.",
+      "A higher-priority explicit entity contribution may reintroduce the entity above the cutoff.",
+      "Entity tombstoning is distinct from save-time omission, which emits no mention of the entity and makes no absence assertion."
+    ]
   },
   "api": {
     "targeting": [
@@ -251,6 +279,23 @@
         ]
       },
       {
+        "name": "tombstone_entity",
+        "signature": "tombstone_entity(metadata=None)",
+        "description": "Write an active conventional entity tombstone aspect into overlay for the targeted entity.",
+        "rules": [
+          "The emitted aspect id is tag:m1lattice.net,2026/aspect/tombstone.",
+          "The aspect value must contain entity=true.",
+          "Optional metadata may include reason, timestamp, agent, and additional keys.",
+          "This is equivalent to setting the conventional aspect directly, but provides an intention-revealing API.",
+          "The call nullifies the intended overlay m1.id and invalidates selected state for the entire targeted entity."
+        ]
+      },
+      {
+        "name": "has_entity_tombstone",
+        "signature": "has_entity_tombstone(entity_id=None) -> bool",
+        "description": "Return whether the selected conventional tombstone aspect is active for the targeted or specified entity."
+      },
+      {
         "name": "list_entities",
         "signature": "list_entities() -> [entity_id, ...]",
         "description": "Return the total visible surface of entities known about."
@@ -263,12 +308,12 @@
       {
         "name": "list_aspects",
         "signature": "list_aspects(\"*\") -> [aspect_id, ...]",
-        "description": "Return all known aspects on the targeted entity, including aspects set to None."
+        "description": "Return all selected aspects on the targeted entity, including aspects set to None and the selected entity tombstone aspect, but excluding ordinary aspects hidden at or below an active entity tombstone cutoff."
       },
       {
         "name": "has_entity",
         "signature": "has_entity(entity_id) -> bool",
-        "description": "Return whether the entity is known on the visible surface."
+        "description": "Return whether the entity is present on the visible surface after applying any selected entity tombstone cutoff."
       },
       {
         "name": "has_aspect",
@@ -288,7 +333,7 @@
       {
         "name": "get_surface",
         "signature": "get_surface(\"*\") -> {aspect_id: aspect_data_or_none, ...}",
-        "description": "Return the full aspect surface of the targeted entity, including None tombstones."
+        "description": "Return the full selected aspect surface of the targeted entity, including None tombstones and an active entity tombstone, but excluding ordinary aspects hidden at or below its cutoff."
       }
     ],
     "sourcing": [
@@ -517,6 +562,8 @@
         "O and S are mutually exclusive.",
         "+, !, and - are mutually exclusive.",
         "Snapshot save writes the currently visible value for every known entity/aspect using overlay first, then priority in order.",
+        "Snapshot save must also emit each selected active entity tombstone even when the tombstoned entity is absent from the ordinary visible entity surface.",
+        "Ordinary aspects hidden by an entity tombstone cutoff must not be emitted into a snapshot.",
         "Without t, save does not include table contributions.",
         "With t, overlay save includes overlay_table contributions, and snapshot save includes the total visible table surface.",
         "w may only be used if t is also present.",
@@ -677,6 +724,7 @@
   },
   "open_points": [
     "How this runtime minimum for written M1 documents should integrate with the formal transport spec remains to be settled.",
-    "Further table-runtime details beyond overlay_table, table_cache, t-flag behavior, and weed_table() may still deserve a dedicated document."
+    "Further table-runtime details beyond overlay_table, table_cache, t-flag behavior, and weed_table() may still deserve a dedicated document.",
+    "The API and state model for save-time omission, which is distinct from tombstoning, remains to be specified."
   ]
 }

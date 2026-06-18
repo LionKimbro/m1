@@ -6,6 +6,7 @@
     "version": "v2.0",
     "status": "final",
     "finalized": "2026-04-11",
+    "amended": "2026-06-18",
     "supersedes": [
       "m1lattice.spec.core"
     ],
@@ -18,6 +19,7 @@
     "There is only one structural primitive: the entity.",
     "Identity is stable; all meaning is expressed through aspects.",
     "Links are entities recognized by a conventional link aspect.",
+    "Whole-entity absence in a layered interpretation is expressed through a conventional entity tombstone aspect.",
     "Structure emerges through interpretation of aspects.",
     "Ambiguity in the 'basic' aspect enables flexibility.",
     "Precision is introduced through specialized aspects."
@@ -30,7 +32,8 @@
     "Resolves identifiers",
     "Supports aspects",
     "Recognizes basic aspect convention",
-    "Recognizes link aspect convention"
+    "Recognizes link aspect convention",
+    "Recognizes entity tombstone aspect convention"
   ],
   "softspec": {
     "types": {
@@ -358,6 +361,54 @@
               "semantic_type": "label",
               "required": false,
               "description": "Human-readable label describing the relationship."
+            }
+          },
+          "additional_keys": true
+        }
+      },
+      "entity_tombstone": {
+        "title": "Entity Tombstone Aspect",
+        "id": "tag:m1lattice.net,2026/aspect/tombstone",
+        "description": "The entity tombstone aspect asserts that the entity is absent at this contribution or layer and covers all lower-priority contributions for that entity.",
+        "notes": [
+          "An entity tombstone does not destroy, revoke, or change the entity's stable identity.",
+          "An entity tombstone does not erase other transport units or historical contributions.",
+          "References to a tombstoned entity remain valid references to its identifier.",
+          "An entity tombstone is different from omitting an entity from a transport unit. Omission makes no assertion; a tombstone explicitly asserts absence at a layer.",
+          "Aspect-level absence continues to be represented independently by a null value for the particular aspect."
+        ],
+        "rules": [
+          "An active entity tombstone has an object value whose 'entity' field is true.",
+          "In an ordered layered interpretation, an active entity tombstone covers all ordinary aspects for the same entity in its own layer and in lower-priority layers.",
+          "Higher-priority contributions are not covered and may reintroduce the entity or provide visible aspects.",
+          "A contribution SHOULD NOT attach ordinary aspects alongside an active entity tombstone for the same entity. Consumers SHOULD report such content as contradictory; the tombstone governs that contribution.",
+          "The tombstone aspect itself remains an aspect and may be covered by a higher-priority null value under ordinary aspect tombstone semantics."
+        ],
+        "structure": {
+          "type": "object",
+          "keys": {
+            "entity": {
+              "type": "boolean",
+              "required": true,
+              "const": true,
+              "description": "Must be true to express an active whole-entity tombstone."
+            },
+            "reason": {
+              "type": "string",
+              "semantic_type": "text",
+              "required": false,
+              "description": "Optional human-readable reason for asserting absence."
+            },
+            "timestamp": {
+              "type": "string",
+              "semantic_type": "timestamp",
+              "required": false,
+              "description": "Optional timestamp associated with the assertion."
+            },
+            "agent": {
+              "type": "entity-id",
+              "required": false,
+              "description": "Optional identifier of the agent making the assertion."
             }
           },
           "additional_keys": true

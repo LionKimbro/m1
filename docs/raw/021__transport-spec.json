@@ -6,6 +6,7 @@
     "version": "v2.0",
     "status": "final",
     "finalized": "2026-04-11",
+    "amended": "2026-06-18",
     "supersedes": [
       "m1lattice.spec.transport"
     ],
@@ -61,7 +62,8 @@
   "entity_representation": {
     "description": "Entities are represented implicitly by their presence as keys in the 'entities' map or by reference within aspects.",
     "rules": [
-      "An entity exists if its identifier appears in the transport unit.",
+      "An entity is represented in a transport unit if its identifier appears there, including when the only contribution is an entity tombstone.",
+      "Representational presence in one transport unit does not by itself determine whether the entity is visible in a layered interpretation.",
       "An entity may be referenced without being explicitly defined.",
       "An entity has no intrinsic structure beyond its identifier."
     ]
@@ -74,6 +76,28 @@
       "Aspect structure is determined by its identifier.",
       "Multiple aspects may be associated with a single entity."
     ]
+  },
+  "entity_tombstone_representation": {
+    "description": "Whole-entity absence in a layered dataset is represented by the conventional entity tombstone aspect defined by m1lattice.spec.core.v2.",
+    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "rules": [
+      "An active entity tombstone is serialized as an ordinary aspect with an object value whose 'entity' field is true.",
+      "A transport MUST NOT represent an entity tombstone by assigning null directly to the entity identifier.",
+      "The entity entry remains an aspect map, preserving the single entity/aspect transport structure.",
+      "A tombstone is an explicit contribution and is not equivalent to omitting the entity identifier from the transport.",
+      "An entity omitted from a transport makes no statement about whether that entity exists or is absent.",
+      "References to a tombstoned or omitted entity MAY remain in the same or other transport units."
+    ],
+    "example": {
+      "entities": {
+        "550e8400-e29b-41d4-a716-446655440000": {
+          "tag:m1lattice.net,2026/aspect/tombstone": {
+            "entity": true,
+            "reason": "Removed from this layered view."
+          }
+        }
+      }
+    }
   },
   "containment": {
     "description": "A transport unit represents a partial, non-authoritative contribution to the global graph.",
@@ -124,6 +148,9 @@
     "rules": [
       "Transport units may represent incremental additions to the graph.",
       "Updates may be expressed by providing new aspect values for existing entities.",
+      "Aspect-level absence may be expressed with a null aspect value.",
+      "Whole-entity absence in layered interpretation may be expressed with the conventional entity tombstone aspect.",
+      "Physical omission from a rewritten transport is a persistence decision and does not itself assert absence.",
       "Append-only and layered models are supported but not required.",
       "Transport format does not prescribe a specific persistence strategy."
     ]
