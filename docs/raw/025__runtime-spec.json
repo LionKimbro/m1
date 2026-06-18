@@ -103,6 +103,29 @@
         "Table identifiers follow the transport spec: UUID or Tag URI."
       ]
     },
+    "save_omissions": {
+      "description": "Non-serialized session directives that remove selected entities or aspects from emitted documents.",
+      "structure": {
+        "entities": [
+          "<entity_id>"
+        ],
+        "aspects": {
+          "<entity_id>": [
+            "<aspect_id>"
+          ]
+        }
+      },
+      "rules": [
+        "Save omissions affect emission only and do not participate in layered selection.",
+        "Save omissions are not M1 claims and are never serialized.",
+        "Entity omission removes the entity entry from both overlay and snapshot saves.",
+        "When tables are included, entity omission also removes the table entry keyed by that identifier.",
+        "Entity omission does not recursively remove links or arbitrary references to the identifier.",
+        "Aspect omission removes only the selected aspect and removes the entity entry if it becomes empty.",
+        "Omissions are applied after overlay or snapshot content is combined with an amend-save base.",
+        "clear_overlay() also clears save omissions."
+      ]
+    },
     "cache": {
       "description": "Selected visible aspect value per entity_id + aspect_id.",
       "structure": {
@@ -208,7 +231,9 @@
     "rules": [
       "None is a covering / masking value.",
       "Once None is encountered during overlay / priority search, lookup stops.",
-      "Lower-priority M1 documents are not consulted further for that entity_id + aspect_id."
+      "Lower-priority M1 documents are not consulted further for that entity_id + aspect_id.",
+      "None is preserved as JSON null by every save mode, including O+ and S+ amend saves.",
+      "Physical removal from emitted output is performed only by save-time omission directives."
     ],
     "example": {
       "priority_1": "no value",
@@ -294,6 +319,21 @@
         "name": "has_entity_tombstone",
         "signature": "has_entity_tombstone(entity_id=None) -> bool",
         "description": "Return whether the selected conventional tombstone aspect is active for the targeted or specified entity."
+      },
+      {
+        "name": "tombstone_aspect",
+        "signature": "tombstone_aspect(aspect_id)",
+        "description": "Intention-revealing alias for set_aspect(aspect_id, None)."
+      },
+      {
+        "name": "omit_aspect",
+        "signature": "omit_aspect(aspect_id)",
+        "description": "Record a non-serialized directive to exclude the aspect from subsequent overlay and snapshot saves."
+      },
+      {
+        "name": "omit_entity",
+        "signature": "omit_entity(entity_id=None)",
+        "description": "Record a non-serialized directive to exclude the targeted or specified entity from subsequent overlay and snapshot saves."
       },
       {
         "name": "list_entities",
@@ -397,7 +437,17 @@
       {
         "name": "clear_overlay",
         "signature": "clear_overlay()",
-        "description": "Clear overlay entries and overlay metadata."
+        "description": "Clear overlay entries, overlay metadata, overlay table content, and save omissions."
+      },
+      {
+        "name": "get_omissions",
+        "signature": "get_omissions() -> omission_dict",
+        "description": "Return the current non-serialized entity and aspect save omissions."
+      },
+      {
+        "name": "clear_omissions",
+        "signature": "clear_omissions()",
+        "description": "Clear all save omissions without changing overlay claims."
       },
       {
         "name": "set_uuid",
@@ -537,6 +587,8 @@
           "rules": [
             "When amending, merge user-specified overlay_headers values on top of the existing m1 header.",
             "If a header key is not specified in overlay_headers, do not erase the existing value.",
+            "Preserve None aspect values as JSON null tombstones; amend save does not interpret them as physical removal.",
+            "Apply explicit save omissions after combining with the existing target.",
             "The emitted result receives a fresh m1.id and a fresh m1.timestamp."
           ]
         },
@@ -562,8 +614,11 @@
         "O and S are mutually exclusive.",
         "+, !, and - are mutually exclusive.",
         "Snapshot save writes the currently visible value for every known entity/aspect using overlay first, then priority in order.",
-        "Snapshot save must also emit each selected active entity tombstone even when the tombstoned entity is absent from the ordinary visible entity surface.",
+        "When an active entity tombstone leaves the entity absent from the visible surface, snapshot save must emit that tombstone rather than omit the entity.",
+        "When a higher layer reintroduces a tombstoned entity, a flattened snapshot emits the visible higher-layer ordinary aspects and does not emit the lower tombstone alongside them.",
         "Ordinary aspects hidden by an entity tombstone cutoff must not be emitted into a snapshot.",
+        "After constructing overlay or snapshot content and applying any amend base, apply entity and aspect save omissions.",
+        "All save modes preserve None aspect values as JSON null unless that aspect or entity is explicitly omitted.",
         "Without t, save does not include table contributions.",
         "With t, overlay save includes overlay_table contributions, and snapshot save includes the total visible table surface.",
         "w may only be used if t is also present.",
@@ -724,7 +779,6 @@
   },
   "open_points": [
     "How this runtime minimum for written M1 documents should integrate with the formal transport spec remains to be settled.",
-    "Further table-runtime details beyond overlay_table, table_cache, t-flag behavior, and weed_table() may still deserve a dedicated document.",
-    "The API and state model for save-time omission, which is distinct from tombstoning, remains to be specified."
+    "Further table-runtime details beyond overlay_table, table_cache, t-flag behavior, and weed_table() may still deserve a dedicated document."
   ]
 }

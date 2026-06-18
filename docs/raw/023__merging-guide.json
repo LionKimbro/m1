@@ -96,7 +96,7 @@
     "conflict_notes": [
       "An active tombstone and ordinary aspects contributed for the same entity by the same transport are contradictory.",
       "Different applications may select, annotate, quarantine, or refuse competing tombstone and non-tombstone contributions.",
-      "A snapshot intended to preserve layered behavior must retain the selected tombstone claim rather than merely omit the entity."
+      "A snapshot must retain the selected tombstone claim when the entity is absent. If a higher layer reintroduces the entity, a flattened snapshot emits the visible higher-layer aspects without the lower tombstone."
     ]
   },
   "merging_baseline": {

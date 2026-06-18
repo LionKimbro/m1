@@ -100,8 +100,9 @@ Rules:
   - None is a legitimate aspect value.
   - It means: this aspect on this entity is explicitly deleted /
     non-existent.
-  - On amend save, this masks / removes the corresponding aspect in the
-    output file.
+  - Every save mode, including amend save, preserves it as JSON null.
+  - Physical removal from emitted output is expressed separately through
+    save-time omission directives.
 
 
 == overlay_headers ==

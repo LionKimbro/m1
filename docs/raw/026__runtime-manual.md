@@ -281,7 +281,7 @@ m1.set_aspect("tag:example.org,2026:aspect/obsolete-note", None)
 
 ### Tombstoning A Whole Entity
 
-The intended convenience API is:
+The convenience API is:
 
 ```python
 m1.target_entity(entity_id)
@@ -311,9 +311,36 @@ An entity tombstone:
 - does not invalidate links or other references
 - is not the same as omitting the UUID from a saved transport
 
-Snapshot saving must retain the selected tombstone aspect while excluding the ordinary aspects it covers. Merely leaving the UUID out would lose the explicit absence assertion and could allow lower layers to reappear when the snapshot is loaded with other data.
+When the entity remains absent, snapshot saving retains the selected tombstone aspect while excluding the ordinary aspects it covers. Merely leaving the UUID out would lose the explicit absence assertion. If a higher layer reintroduces the entity, the flattened snapshot instead emits only the visible higher-layer aspects; emitting the lower tombstone beside them would create a contradictory single-layer contribution.
 
-The current Python implementation predates this specification amendment and does not yet apply entity-wide tombstone selection semantics.
+The runtime applies this cutoff during aspect lookup, entity listing, and snapshot construction.
+
+### Omitting Data From Saves
+
+Omission is different from tombstoning:
+
+```python
+m1.target_entity(entity_id)
+m1.omit_aspect(aspect_id)
+m1.omit_entity()
+```
+
+- a tombstone is an M1 claim and affects layered interpretation
+- an omission is a runtime save directive and is never serialized
+- `omit_aspect(...)` excludes that aspect from both `O` and `S` saves
+- `omit_entity(...)` excludes the entity from both `O` and `S` saves
+- amend saves apply omissions after combining with the existing target, so omitted data is physically removed from the result
+- when saving with `t`, entity omission also removes a table entry keyed by that identifier
+- links and arbitrary references to an omitted identifier are preserved
+
+You can inspect or clear these directives:
+
+```python
+m1.get_omissions()
+m1.clear_omissions()
+```
+
+`clear_overlay()` also clears all omissions. Saving does not clear them automatically.
 
 ### Listing Entities
 
@@ -541,7 +568,7 @@ The default save target is overlay.
 
 #### `O!`
 
-Write the current overlay as a new emitted M1 transport at the target path.
+Write the current overlay, after applying save omissions, as a new emitted M1 transport at the target path.
 
 #### `O+`
 
@@ -550,10 +577,12 @@ If the target file exists:
 1. load that file
 2. amend its entity content with overlay
 3. merge `overlay_headers` on top of its `m1` header
-4. preserve unspecified existing header keys
-5. emit fresh `m1.id`
-6. emit fresh `m1.timestamp`
-7. write result back
+4. preserve `None` aspect values as JSON `null` tombstones
+5. apply save omissions to the combined result
+6. preserve unspecified existing header keys
+7. emit fresh `m1.id`
+8. emit fresh `m1.timestamp`
+9. write result back
 
 This is useful when you are progressively editing an M1 file and want to preserve material that was already there.
 
@@ -565,13 +594,13 @@ Refuse to write if the target path already exists.
 
 #### `S!`
 
-Write the current visible world as a snapshot.
+Write the current visible world as a snapshot, then apply save omissions.
 
 #### `S+`
 
 Amend an existing file with the current visible world.
 
-This preserves unspecified existing `m1` header keys, but still emits a fresh `m1.id` and a fresh `m1.timestamp`.
+This preserves unspecified existing `m1` header keys, applies save omissions to the combined result, and still emits a fresh `m1.id` and a fresh `m1.timestamp`.
 
 #### `S-`
 
@@ -598,6 +627,8 @@ You are saying:
 That explicit absence covers lower-priority definitions.
 
 This applies both in runtime and in serialized transport, where `None` becomes JSON `null`.
+
+Every save mode preserves this distinction. In particular, `O+` does not treat `None` as an instruction to physically remove an aspect from the amended file. Use `omit_aspect(...)` or `omit_entity(...)` when the emitted document must contain no mention of that aspect or entity.
 
 For whole-entity absence, use the conventional entity tombstone aspect rather than setting every known aspect to `None`. Setting every known aspect to `None` cannot cover an unknown aspect that appears only in a lower layer.
 
