@@ -1,30 +1,38 @@
 {
   "document": {
-    "document-id": "m1lattice.spec.transport.v2",
+    "document-id": "m1lattice.spec.transport.v3",
     "title": "M1 Lattice: Transport Specification (Epoch 2)",
     "purpose": "Defines how M1 entities and aspects are represented for storage and exchange.",
-    "version": "v2.0",
+    "version": "v3.0",
     "status": "final",
-    "finalized": "2026-04-11",
-    "amended": "2026-06-18",
+    "created": "2026-07-23",
+    "finalized": "2026-07-23",
     "supersedes": [
-      "m1lattice.spec.transport"
-    ],
-    "superseded-by": [
-      "m1lattice.spec.transport.v3"
+      "m1lattice.spec.transport.v2"
     ],
     "builds_on": [
-      "softspec.spec.v2",
-      "m1lattice.spec.core.v2"
+      "softspec.spec.v3",
+      "m1lattice.spec.core.v3"
     ],
     "see_also": [
       "m1lattice.merging.guide.v2"
-    ]
+    ],
+    "type": {
+      "logical": {
+        "base": "file",
+        "format": "json",
+        "encoding": "utf-8"
+      },
+      "semantic": {
+        "base": "spec"
+      }
+    }
   },
-  "core_principle": "An M1 transport unit is a structured collection of aspects indexed by entity identifier. Entities are represented solely by their identifiers, and all meaning is expressed through associated aspects.",
+  "core_principle": "An M1 transport unit is a structured collection of entity contributions indexed by entity identifier. Each contribution may contain aspects and transport-level tombstone instructions. Entities are represented solely by their identifiers.",
   "design_principles": [
     "Entities are identified solely by their identifier.",
-    "Aspects carry all meaning and structure.",
+    "Aspects carry entity meaning and structure.",
+    "Transport-level instructions are distinct from aspects.",
     "Transport structure is optimized for convenience of reading and writing.",
     "Transport does not prescribe in-memory representation.",
     "Transport does not define merging or conflict resolution.",
@@ -46,7 +54,8 @@
     "Recognizes entity identifiers",
     "Supports aspect association with entities",
     "Supports core aspect conventions",
-    "Parses transport structure into entity identifiers and associated aspects",
+    "Recognizes transport-level entity and aspect tombstones",
+    "Parses transport structure into entity identifiers, associated aspects, and transport instructions",
     "Reads and exposes table mappings if present"
   ],
   "transport_unit": {
@@ -63,40 +72,63 @@
     ]
   },
   "entity_representation": {
-    "description": "Entities are represented implicitly by their presence as keys in the 'entities' map or by reference within aspects.",
+    "description": "Entities are represented implicitly by their presence as keys in the 'entities' map or by reference within aspect contents.",
     "rules": [
-      "An entity is represented in a transport unit if its identifier appears there, including when the only contribution is an entity tombstone.",
+      "An entity is represented in a transport unit if its identifier appears as a key in the 'entities' map.",
+      "An entity entry may contribute aspects, aspect tombstones, or both, provided that no aspect is both contributed and tombstoned; alternatively, it may contribute a whole-entity tombstone.",
       "Representational presence in one transport unit does not by itself determine whether the entity is visible in a layered interpretation.",
-      "An entity may be referenced without being explicitly defined.",
+      "An entity may be referenced without being explicitly represented.",
       "An entity has no intrinsic structure beyond its identifier."
     ]
   },
   "aspect_representation": {
-    "description": "Aspects are represented as key-value pairs nested under an entity identifier.",
+    "description": "Aspects are represented as key-value pairs within an entity entry.",
     "rules": [
-      "Each aspect is identified by its key within an entity entry, typically a Tag URI or entity-id.",
-      "The value associated with the key is the aspect content.",
-      "Aspect structure is determined by its identifier.",
+      "Each aspect is identified by its key within an entity entry.",
+      "An aspect identifier MUST be an entity-id.",
+      "An aspect identifier is RECOMMENDED to be a Tag URI.",
+      "The reserved keys 'tombstone' and 'tombstones' are transport instructions and are not aspect identifiers.",
+      "The value associated with an aspect identifier is the aspect content.",
+      "Aspect content may be any valid JSON value, including null.",
+      "The expected type, structure, and interpretation of aspect content are determined by the aspect identifier.",
+      "The presence of an aspect identifier means that the aspect is present, regardless of its content value.",
       "Multiple aspects may be associated with a single entity."
     ]
   },
-  "entity_tombstone_representation": {
-    "description": "Whole-entity absence in a layered dataset is represented by the conventional entity tombstone aspect defined by m1lattice.spec.core.v2.",
-    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+  "tombstone_representation": {
+    "description": "Explicit absence in a layered interpretation is represented by reserved transport keys within an entity entry. Tombstones are transport instructions and are not aspects.",
     "rules": [
-      "An active entity tombstone is serialized as an ordinary aspect with an object value whose 'entity' field is true.",
-      "A transport MUST NOT represent an entity tombstone by assigning null directly to the entity identifier.",
-      "The entity entry remains an aspect map, preserving the single entity/aspect transport structure.",
-      "A tombstone is an explicit contribution and is not equivalent to omitting the entity identifier from the transport.",
-      "An entity omitted from a transport makes no statement about whether that entity exists or is absent.",
-      "References to a tombstoned or omitted entity MAY remain in the same or other transport units."
+      "An entity entry is not required to contain either 'tombstone' or 'tombstones'.",
+      "The reserved key 'tombstone' expresses a whole-entity tombstone.",
+      "The value of 'tombstone' MUST be true.",
+      "The reserved key 'tombstones' expresses aspect-level tombstones.",
+      "The value of 'tombstones' MUST be an array of aspect identifiers.",
+      "Each value in the 'tombstones' array MUST be an aspect identifier.",
+      "An entity or aspect omitted from a transport makes no assertion of absence.",
+      "A tombstone is an explicit contribution and is not equivalent to omission.",
+      "A null aspect value is an ordinary present aspect value and does not express a tombstone.",
+      "References to tombstoned or omitted entities MAY remain in the same or other transport units."
     ],
-    "example": {
-      "entities": {
-        "550e8400-e29b-41d4-a716-446655440000": {
-          "tag:m1lattice.net,2026/aspect/tombstone": {
-            "entity": true,
-            "reason": "Removed from this layered view."
+    "constraints": [
+      "The keys 'tombstone' and 'tombstones' MUST NOT both appear in the same entity entry.",
+      "An entity entry containing 'tombstone': true MUST NOT contain aspect contributions.",
+      "An aspect identifier MUST NOT appear both as an aspect contribution and in the 'tombstones' array of the same entity entry."
+    ],
+    "examples": {
+      "entity_tombstone": {
+        "entities": {
+          "550e8400-e29b-41d4-a716-446655440000": {
+            "tombstone": true
+          }
+        }
+      },
+      "aspect_tombstones": {
+        "entities": {
+          "550e8400-e29b-41d4-a716-446655440000": {
+            "tombstones": [
+              "tag:example.com,2026/aspect/obsolete",
+              "tag:example.com,2026/aspect/legacy"
+            ]
           }
         }
       }
@@ -120,11 +152,14 @@
     ]
   },
   "identity_resolution": {
-    "description": "Identity resolution governs how objects from multiple transport units are unified.",
+    "description": "Identity resolution governs how references from multiple transport units are unified.",
     "rules": [
-      "The entity-id (UUID or Tag URI) is the authoritative identifier.",
-      "If two transport units refer to the same entity using different forms of its identifier, implementations should resolve them to the same entity where possible.",
-      "If conflicting identity mappings are encountered (e.g., the same entity-id appearing to refer to two distinct things), this is a structural problem and should be reported.",
+      "The entity-id, expressed as either a UUID or Tag URI, is the authoritative identifier.",
+      "UUIDs MUST use the standard hyphenated lowercase textual form.",
+      "Tag URIs MUST be preserved exactly and compared using exact string equality.",
+      "Two identical entity-id strings of the same identifier form identify the same logical entity.",
+      "Different Tag URI strings MUST NOT be unified through canonicalization, normalization, case-folding, decoding, re-encoding, or other rewriting.",
+      "If the same entity-id appears to refer to distinct things, this is a structural problem and SHOULD be reported.",
       "Implementations must resolve entity-id values to their corresponding entities when possible."
     ]
   },
@@ -147,15 +182,16 @@
     ]
   },
   "mutation_model": {
-    "description": "Defines how changes are represented in transport units.",
+    "description": "Defines how changes may be represented in transport units.",
     "rules": [
       "Transport units may represent incremental additions to the graph.",
       "Updates may be expressed by providing new aspect values for existing entities.",
-      "Aspect-level absence may be expressed with a null aspect value.",
-      "Whole-entity absence in layered interpretation may be expressed with the conventional entity tombstone aspect.",
+      "A null aspect value is an ordinary present aspect value.",
+      "Aspect-level absence in a layered interpretation may be expressed with the reserved 'tombstones' transport key.",
+      "Whole-entity absence in a layered interpretation may be expressed with the reserved 'tombstone' transport key.",
       "Physical omission from a rewritten transport is a persistence decision and does not itself assert absence.",
       "Append-only and layered models are supported but not required.",
-      "Transport format does not prescribe a specific persistence strategy."
+      "The transport format does not prescribe a specific persistence strategy."
     ]
   },
   "tables": {
@@ -182,14 +218,15 @@
       "Systems must recognize the 'm1' header and its version field.",
       "Systems must support partial data and incremental loading.",
       "Systems must interoperate via shared identity conventions.",
-      "No shared schema is required beyond m1lattice.spec.core.v2 and this transport specification."
+      "Systems conforming to version 3.0 must distinguish aspects from reserved transport instructions.",
+      "No shared schema is required beyond m1lattice.spec.core.v3 and this transport specification."
     ]
   },
   "softspec": {
     "schemas": {
       "m1_transport_unit": {
         "title": "M1 Transport Unit",
-        "description": "A transport unit is a file or data structure containing a set of entities and their associated aspects.",
+        "description": "A transport unit is a file or data structure containing entity contributions composed of aspects and optional transport-level tombstone instructions.",
         "structure": {
           "type": "object",
           "keys": {
@@ -213,7 +250,7 @@
                   "required": true,
                   "description": "Specifies the version of the M1 transport format.",
                   "examples": [
-                    "2.0"
+                    "3.0"
                   ]
                 },
                 "created": {
@@ -252,23 +289,44 @@
             "entities": {
               "type": "object",
               "required": false,
-              "description": "A mapping from entity identifiers to their associated aspects.",
+              "description": "A mapping from entity identifiers to entity contributions.",
               "key_type": "entity-id",
               "value_type": {
                 "type": "object",
-                "description": "A mapping from aspect identifiers to aspect contents.",
-                "key_type": "entity-id",
-                "value_type": {
-                  "type": "object",
-                  "description": "Aspect content. The structure is determined by the aspect identifier.",
-                  "additional_keys": true
-                }
+                "description": "An entity contribution containing aspect values or transport-level tombstone instructions.",
+                "keys": {
+                  "tombstone": {
+                    "type": "boolean",
+                    "required": false,
+                    "const": true,
+                    "description": "Expresses a whole-entity tombstone."
+                  },
+                  "tombstones": {
+                    "type": "array",
+                    "required": false,
+                    "description": "Aspect identifiers explicitly tombstoned by this contribution.",
+                    "items": {
+                      "type": "entity-id"
+                    }
+                  }
+                },
+                "additional_keys": {
+                  "key_type": "entity-id",
+                  "value_type": {
+                    "description": "Aspect content. May be any valid JSON value. Its expected type, structure, and interpretation are determined by the aspect identifier."
+                  }
+                },
+                "constraints": [
+                  "An entity entry may contain 'tombstone', 'tombstones', or neither, but MUST NOT contain both.",
+                  "An entity entry containing 'tombstone': true MUST NOT contain aspect contributions.",
+                  "An aspect identifier MUST NOT appear both as an aspect contribution and in the 'tombstones' array of the same entity entry."
+                ]
               }
             },
             "table": {
               "type": "object",
               "required": false,
-              "description": "Optional mapping of identifiers to resource locations. Structure as defined in m1lattice.spec.core.v2, schema 'table'."
+              "description": "Optional mapping of identifiers to resource locations. Structure as defined in m1lattice.spec.core.v3, schema 'table'."
             }
           }
         }
