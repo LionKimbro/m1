@@ -52,7 +52,7 @@
         "type": "string",
         "description": "A Tag URI, providing a human-meaningful globally unique identifier.",
         "examples": [
-          "tag:m1lattice.net,2026/aspect/basic"
+          "tag:m1lattice.net,2026:aspect/basic"
         ],
         "rfc": "RFC-4151"
       },
@@ -211,7 +211,7 @@
       },
       "basic": {
         "title": "Basic Aspect",
-        "id": "tag:m1lattice.net,2026/aspect/basic",
+        "id": "tag:m1lattice.net,2026:aspect/basic",
         "description": "The basic aspect provides a minimal, broadly interpretable layer of information to support generic browsing and interaction.",
         "notes": [
           "The 'typehint' field provides a human-readable indication of an entity's general nature.",
@@ -325,7 +325,7 @@
       },
       "link": {
         "title": "Link Aspect",
-        "id": "tag:m1lattice.net,2026/aspect/link",
+        "id": "tag:m1lattice.net,2026:aspect/link",
         "description": "Links are expressed as entities that contain a link aspect. The link aspect defines a directional relationship between two entities.",
         "notes": [
           "Links are entities with their own identity.",
@@ -368,7 +368,7 @@
       },
       "entity_tombstone": {
         "title": "Entity Tombstone Aspect",
-        "id": "tag:m1lattice.net,2026/aspect/tombstone",
+        "id": "tag:m1lattice.net,2026:aspect/tombstone",
         "description": "The entity tombstone aspect asserts that the entity is absent at this contribution or layer and covers all lower-priority contributions for that entity.",
         "notes": [
           "An entity tombstone does not destroy, revoke, or change the entity's stable identity.",
@@ -416,7 +416,7 @@
       },
       "log": {
         "title": "Log Aspect",
-        "id": "tag:m1lattice.net,2026/aspect/log",
+        "id": "tag:m1lattice.net,2026:aspect/log",
         "description": "Logs on entities preserve a common log of activities.",
         "notes": [
           "Logs represent a chronological record of events associated with an entity.",

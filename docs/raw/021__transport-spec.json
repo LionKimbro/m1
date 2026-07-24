@@ -82,7 +82,7 @@
   },
   "entity_tombstone_representation": {
     "description": "Whole-entity absence in a layered dataset is represented by the conventional entity tombstone aspect defined by m1lattice.spec.core.v2.",
-    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "aspect_id": "tag:m1lattice.net,2026:aspect/tombstone",
     "rules": [
       "An active entity tombstone is serialized as an ordinary aspect with an object value whose 'entity' field is true.",
       "A transport MUST NOT represent an entity tombstone by assigning null directly to the entity identifier.",
@@ -94,7 +94,7 @@
     "example": {
       "entities": {
         "550e8400-e29b-41d4-a716-446655440000": {
-          "tag:m1lattice.net,2026/aspect/tombstone": {
+          "tag:m1lattice.net,2026:aspect/tombstone": {
             "entity": true,
             "reason": "Removed from this layered view."
           }

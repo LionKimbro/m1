@@ -7,7 +7,7 @@ from pathlib import Path
 
 
 OVERLAY = "overlay"
-ENTITY_TOMBSTONE = "tag:m1lattice.net,2026/aspect/tombstone"
+ENTITY_TOMBSTONE = "tag:m1lattice.net,2026:aspect/tombstone"
 
 
 def _new_state():

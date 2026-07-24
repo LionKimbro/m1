@@ -18,7 +18,7 @@
     "tag_uri": {
       "type": "string",
       "required": false,
-      "description": "Optional Tag URI (must begin with 'tag:'). Provides a human-meaningful or globally coordinated identifier associated with this object. Serves as an alias to the primary 'id' and must refer to the same entity."
+      "description": "Optional Tag URI in the form 'tag:<authority>,<date>:<specific>'. Provides a human-meaningful or globally coordinated identifier associated with this object. Serves as an alias to the primary 'id' and must refer to the same entity."
     },
     "type": {
       "type": "string",

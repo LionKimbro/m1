@@ -214,7 +214,7 @@
       "source"
     ],
     "entity_tombstone_rules": [
-      "First resolve tag:m1lattice.net,2026/aspect/tombstone using ordinary aspect selection.",
+      "First resolve tag:m1lattice.net,2026:aspect/tombstone using ordinary aspect selection.",
       "If its selected value is null, lower-priority tombstone assertions are covered and no entity-wide cutoff is active.",
       "If its selected value is an object whose 'entity' field is true, its source layer establishes the entity-wide cutoff.",
       "Ordinary aspects may be selected only from layers above the cutoff.",
@@ -250,7 +250,7 @@
   },
   "entity_tombstone_semantics": {
     "description": "The conventional entity tombstone aspect expresses whole-entity absence in a layered view.",
-    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "aspect_id": "tag:m1lattice.net,2026:aspect/tombstone",
     "active_value": {
       "entity": true
     },
@@ -308,7 +308,7 @@
         "signature": "tombstone_entity(metadata=None)",
         "description": "Write an active conventional entity tombstone aspect into overlay for the targeted entity.",
         "rules": [
-          "The emitted aspect id is tag:m1lattice.net,2026/aspect/tombstone.",
+          "The emitted aspect id is tag:m1lattice.net,2026:aspect/tombstone.",
           "The aspect value must contain entity=true.",
           "Optional metadata may include reason, timestamp, agent, and additional keys.",
           "This is equivalent to setting the conventional aspect directly, but provides an intention-revealing API.",

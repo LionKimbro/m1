@@ -44,7 +44,7 @@ Once `None` is encountered, lower-priority M1 documents are not consulted for th
 M1 also defines a conventional whole-entity tombstone aspect:
 
 ```text
-tag:m1lattice.net,2026/aspect/tombstone
+tag:m1lattice.net,2026:aspect/tombstone
 ```
 
 An active value such as `{"entity": true}` establishes an entity-wide cutoff. The tombstone's own layer and lower-priority layers do not contribute visible aspects for that entity. Higher-priority layers may still reintroduce it.
@@ -206,7 +206,7 @@ import m1
 m1.load_m1("background.m1")
 m1.load_m1("working-file.m1")
 
-m1_basic = "tag:m1lattice.net,2026/aspect/basic"
+m1_basic = "tag:m1lattice.net,2026:aspect/basic"
 
 m1.target_entity("7c2be3c4-1111-4d54-b432-aaaaaaaaaaaa")
 basic = m1.get_aspect(m1_basic)
@@ -268,7 +268,7 @@ That last rule matters because changing overlay content means the next emitted d
 Example:
 
 ```python
-m1_basic = "tag:m1lattice.net,2026/aspect/basic"
+m1_basic = "tag:m1lattice.net,2026:aspect/basic"
 
 m1.target_entity(project_id)
 m1.set_aspect(m1_basic, {
@@ -294,7 +294,7 @@ This writes the conventional aspect:
 
 ```json
 {
-  "tag:m1lattice.net,2026/aspect/tombstone": {
+  "tag:m1lattice.net,2026:aspect/tombstone": {
     "entity": true,
     "reason": "Removed from this layered view."
   }
@@ -366,7 +366,7 @@ Use these when you want provenance.
 Example:
 
 ```python
-m1_basic = "tag:m1lattice.net,2026/aspect/basic"
+m1_basic = "tag:m1lattice.net,2026:aspect/basic"
 
 m1.target_entity(project_id)
 src = m1.source_aspect(m1_basic)
@@ -699,9 +699,9 @@ m1.load_m1("F:/lion/github/m1/testdata/001__people-and-languages.m1")
 m1.load_m1("F:/lion/github/m1/testdata/002__programs-and-links.m1")
 
 PROJECT_ID = "b2c3d4e5-1111-49a0-8b01-555555555555"
-M1_BASIC = "tag:m1lattice.net,2026/aspect/basic"
-M1_LOG = "tag:m1lattice.net,2026/aspect/log"
-MY_NOTES_ASPECT = "tag:lionkimbro@gmail.com,2026-05-07/aspect/notes"
+M1_BASIC = "tag:m1lattice.net,2026:aspect/basic"
+M1_LOG = "tag:m1lattice.net,2026:aspect/log"
+MY_NOTES_ASPECT = "tag:lionkimbro@gmail.com,2026-05-07:aspect/notes"
 
 m1.target_entity(PROJECT_ID)
 

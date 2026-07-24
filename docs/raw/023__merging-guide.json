@@ -85,7 +85,7 @@
   },
   "entity_tombstone_model": {
     "description": "The conventional entity tombstone aspect is a contribution asserting whole-entity absence at a layer.",
-    "aspect_id": "tag:m1lattice.net,2026/aspect/tombstone",
+    "aspect_id": "tag:m1lattice.net,2026:aspect/tombstone",
     "principles": [
       "An entity tombstone participates in reconciliation as explicit data; omission does not.",
       "In an ordered layered view, the selected active tombstone establishes a cutoff for ordinary aspects of that entity.",

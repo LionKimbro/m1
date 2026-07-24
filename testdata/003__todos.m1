@@ -11,7 +11,7 @@
   },
   "entities": {
     "d9e0f1a2-1111-4b55-8d01-111111111112": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "task",
         "name": "finish_claimspace_browser",
         "title": "Finish claimspace browser",
@@ -21,7 +21,7 @@
       }
     },
     "d9e0f1a2-2222-4b55-8d01-222222222223": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "task",
         "name": "add_transport_indexing",
         "title": "Add transport indexing",
@@ -31,7 +31,7 @@
       }
     },
     "d9e0f1a2-3333-4b55-8d01-333333333334": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "task",
         "name": "explore_conflict_tools",
         "title": "Explore conflict-resolution tools",
@@ -40,36 +40,36 @@
       }
     },
     "e1f2a3b4-1111-4c66-8e01-444444444445": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "link",
         "name": "lion_has_todo_browser",
         "title": "Lion has todo: finish claimspace browser"
       },
-      "tag:m1lattice.net,2026/aspect/link": {
+      "tag:m1lattice.net,2026:aspect/link": {
         "from": "6a1b3d4e-1111-4f1e-9a01-111111111111",
         "to": "d9e0f1a2-1111-4b55-8d01-111111111112",
         "typehint": "has-task"
       }
     },
     "e1f2a3b4-2222-4c66-8e01-555555555556": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "link",
         "name": "todo_browser_about_m1",
         "title": "Finish claimspace browser is about M1"
       },
-      "tag:m1lattice.net,2026/aspect/link": {
+      "tag:m1lattice.net,2026:aspect/link": {
         "from": "d9e0f1a2-1111-4b55-8d01-111111111112",
         "to": "b2c3d4e5-1111-49a0-8b01-555555555555",
         "typehint": "about"
       }
     },
     "e1f2a3b4-3333-4c66-8e01-666666666667": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "link",
         "name": "todo_indexing_about_m1",
         "title": "Add transport indexing is about M1"
       },
-      "tag:m1lattice.net,2026/aspect/link": {
+      "tag:m1lattice.net,2026:aspect/link": {
         "from": "d9e0f1a2-2222-4b55-8d01-222222222223",
         "to": "b2c3d4e5-1111-49a0-8b01-555555555555",
         "typehint": "about"

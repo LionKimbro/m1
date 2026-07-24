@@ -11,7 +11,7 @@
   },
   "entities": {
     "6a1b3d4e-1111-4f1e-9a01-111111111111": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "person",
         "name": "lion_kimbro",
         "title": "Lion Kimbro",
@@ -21,7 +21,7 @@
       }
     },
     "6a1b3d4e-2222-4f1e-9a01-222222222222": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "programming-language",
         "name": "python",
         "title": "Python",
@@ -30,7 +30,7 @@
       }
     },
     "6a1b3d4e-3333-4f1e-9a01-333333333333": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "programming-language",
         "name": "common_lisp",
         "title": "Common Lisp",
@@ -39,7 +39,7 @@
       }
     },
     "6a1b3d4e-4444-4f1e-9a01-444444444444": {
-      "tag:m1lattice.net,2026/aspect/basic": {
+      "tag:m1lattice.net,2026:aspect/basic": {
         "typehint": "programming-language",
         "name": "c",
         "title": "C",

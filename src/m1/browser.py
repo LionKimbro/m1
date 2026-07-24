@@ -19,8 +19,8 @@ ENTITY_ROWS = "ENTITY_ROWS"
 ASPECT_ROWS = "ASPECT_ROWS"
 INCLUDE_LINKS = "INCLUDE_LINKS"
 
-kBASIC = "tag:m1lattice.net,2026/aspect/basic"
-kLINK = "tag:m1lattice.net,2026/aspect/link"
+kBASIC = "tag:m1lattice.net,2026:aspect/basic"
+kLINK = "tag:m1lattice.net,2026:aspect/link"
 kUUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b")
 
 

@@ -17,10 +17,10 @@ def test_load_m1_and_targeted_access(tmp_path):
                 },
                 "entities": {
                     "uuid-1": {
-                        "tag:m1lattice.net,2026/aspect/basic": {
+                        "tag:m1lattice.net,2026:aspect/basic": {
                             "title": "Alpha",
                         },
-                        "tag:m1lattice.net,2026/aspect/log": {
+                        "tag:m1lattice.net,2026:aspect/log": {
                             "log": [],
                         },
                     }
@@ -38,20 +38,20 @@ def test_load_m1_and_targeted_access(tmp_path):
 
     m1.target_entity("uuid-1")
     assert m1.list_aspects() == [
-        "tag:m1lattice.net,2026/aspect/basic",
-        "tag:m1lattice.net,2026/aspect/log",
+        "tag:m1lattice.net,2026:aspect/basic",
+        "tag:m1lattice.net,2026:aspect/log",
     ]
-    assert m1.get_aspect("tag:m1lattice.net,2026/aspect/basic")["title"] == "Alpha"
-    assert m1.source_aspect("tag:m1lattice.net,2026/aspect/basic") == "11111111-1111-4111-8111-111111111111"
+    assert m1.get_aspect("tag:m1lattice.net,2026:aspect/basic")["title"] == "Alpha"
+    assert m1.source_aspect("tag:m1lattice.net,2026:aspect/basic") == "11111111-1111-4111-8111-111111111111"
 
 
 def test_overlay_writes_immediately_update_selected_value():
     m1.reset()
     m1.target_entity("uuid-1")
-    m1.set_aspect("tag:m1lattice.net,2026/aspect/basic", {"title": "Overlay Title"})
+    m1.set_aspect("tag:m1lattice.net,2026:aspect/basic", {"title": "Overlay Title"})
 
-    assert m1.get_aspect("tag:m1lattice.net,2026/aspect/basic")["title"] == "Overlay Title"
-    assert m1.source_aspect("tag:m1lattice.net,2026/aspect/basic") is None
+    assert m1.get_aspect("tag:m1lattice.net,2026:aspect/basic")["title"] == "Overlay Title"
+    assert m1.source_aspect("tag:m1lattice.net,2026:aspect/basic") is None
 
 
 def test_none_tombstone_covers_lower_priority(tmp_path):
