@@ -52,7 +52,7 @@ LINK_ASPECT = "tag:m1lattice.net,2026:aspect/link"
 LOG_ASPECT = "tag:m1lattice.net,2026:aspect/log"
 
 
-def reset_network_runtime():
+def _reset_network_runtime():
     # Called once at startup and by tests that need an empty network.
     aspects = {}
     sources = {}
@@ -68,7 +68,7 @@ def reset_network_runtime():
     }
 
 
-def canonical_path(p, flags=None):
+def _canonical_path(p, flags=None):
     flags = flags or []
     candidate = Path(p)
 
@@ -80,7 +80,7 @@ def canonical_path(p, flags=None):
 
 
 def target_file(p):
-    g["target-file"] = canonical_path(p, ["new"])
+    g["target-file"] = _canonical_path(p, ["new"])
     return g["target-file"]
 
 
@@ -97,27 +97,30 @@ def known_entities():
 
 
 def known_aspects():
-    selected_entity = g["selected-entity"]
-    if selected_entity is None:
-        raise NoSelectedEntityError()
-
+    selected_entity = _get_selected()
     return list(aspects[selected_entity].keys())
 
 
 def get_aspect(a_id):
-    selected_entity = g["selected-entity"]
-    if selected_entity is None:
-        raise NoSelectedEntityError()
+    selected_entity = _get_selected()
 
     if a_id not in aspects[selected_entity]:
         raise UnknownAspectError(selected_entity, a_id)
 
     return aspects[selected_entity][a_id]
+
+
+def _get_selected():
+    selected_entity = g["selected-entity"]
+    if selected_entity is None:
+        raise NoSelectedEntityError()
+
+    return selected_entity
 ```
 
 ## NOTES
 
-- `reset_network_runtime()` creates all registers together so no partially
+- `_reset_network_runtime()` creates all registers together so no partially
   initialized network is observable.
 - The indexes deliberately retain insertion order; this gives a stable,
   unsurprising result for the list accessors without assigning semantic meaning

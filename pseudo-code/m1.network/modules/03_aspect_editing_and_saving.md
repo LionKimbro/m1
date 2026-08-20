@@ -20,11 +20,11 @@ description: Changes the owning in-memory document and its network indexes toget
 
 ## CALLS
 
-- `canonical_path()` for save targets.
-- `refresh_document_table_before_save()` to embed the current local table view.
+- `_canonical_path()` for save targets.
+- `_refresh_document_table_before_save()` to embed the current local table view.
 - UUID generation for new entities.
 - JSON serialization and atomic filesystem replacement.
-- `mark_file_dirty()`.
+- `_mark_dirty()`.
 
 ## MAY SAFELY ASSUME
 
@@ -56,17 +56,37 @@ description: Changes the owning in-memory document and its network indexes toget
 ## PSEUDOCODE
 
 ```python
+def _prepare_target():
+    target = g["target-file"]
+    if target is None:
+        raise NoTargetFileError()
+
+    document_key = str(target)
+    if document_key not in resources:
+        resources[document_key] = {
+            "source": {"type": "file", "path": document_key},
+            "data": _create_empty_transport_document(),
+            "dirty": False,
+            "writable": True,
+            "load_attempted": None,
+            "load_result": None,
+        }
+
+    _check_writable(document_key)
+    return document_key
+
+
 def create_entity(flags=None):
     flags = flags or []
-    owner = require_target_file_and_prepare_empty_document_if_needed()
-    new_entity_id = generate_normalized_uuid()
+    owner = _prepare_target()
+    new_entity_id = _generate_normalized_uuid()
 
     # A new entity has no aspects yet.  Give it a source-side representation so
     # later set_aspect() can edit the same document without special ownership.
-    add_empty_entity_to_document(resources[owner]["data"], new_entity_id)
+    _add_empty_entity_to_document(resources[owner]["data"], new_entity_id)
     aspects[new_entity_id] = {}
     sources[new_entity_id] = {}
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
 
     if "select" in flags:
         select_entity(new_entity_id)
@@ -75,47 +95,47 @@ def create_entity(flags=None):
 
 
 def set_aspect(a_id, data):
-    selected_entity = require_selected_entity()
-    require_json_compatible(data)
+    selected_entity = _get_selected()
+    _require_json_compatible_data(data)
 
     if a_id in aspects[selected_entity]:
         owner = sources[selected_entity][a_id]
     else:
-        owner = require_target_file_and_prepare_empty_document_if_needed()
+        owner = _prepare_target()
 
-    require_writable_file_resource(owner)
-    replace_or_add_aspect_in_document(resources[owner]["data"], selected_entity, a_id, data)
+    _check_writable(owner)
+    _replace_or_add_aspect_in_document(resources[owner]["data"], selected_entity, a_id, data)
     aspects[selected_entity][a_id] = data
     sources[selected_entity][a_id] = owner
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
 
 
 def delete_aspect(a_id):
-    selected_entity = require_selected_entity()
+    selected_entity = _get_selected()
     if a_id not in aspects[selected_entity]:
         raise UnknownAspectError(selected_entity, a_id)
 
     owner = sources[selected_entity][a_id]
-    require_writable_file_resource(owner)
-    remove_aspect_from_document(resources[owner]["data"], selected_entity, a_id)
+    _check_writable(owner)
+    _remove_aspect_from_document(resources[owner]["data"], selected_entity, a_id)
     del aspects[selected_entity][a_id]
     del sources[selected_entity][a_id]
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
 
 
-def mark_file_dirty(canonical_filepath):
+def _mark_dirty(canonical_filepath):
     resources[canonical_filepath]["dirty"] = True
     dirty_filepaths.add(canonical_filepath)
 
 
 def save_file(p):
-    filepath = canonical_path(p, ["new"])
+    filepath = _canonical_path(p, ["new"])
     record = resources.get(str(filepath))
     if record is None or not record["dirty"]:
         return False
 
-    refresh_document_table_before_save(record["data"])
-    atomically_write_json(filepath, record["data"])
+    _refresh_document_table_before_save(record["data"])
+    _atomically_write_json(filepath, record["data"])
     record["dirty"] = False
     dirty_filepaths.discard(str(filepath))
     return True
@@ -133,6 +153,6 @@ def save_files():
 - Whether an empty entity must be serialized before it has an aspect is a
   transport-envelope question. The function shows the necessary ownership
   behavior but leaves the exact representation for the envelope module.
-- `atomically_write_json()` should write a sibling temporary file and replace
+- `_atomically_write_json()` should write a sibling temporary file and replace
   the destination only after serialization succeeds; its detailed failure and
   recovery policy deserves a later bounded sketch.

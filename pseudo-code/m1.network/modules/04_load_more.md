@@ -67,8 +67,8 @@ description: Attempts eligible table resources in table order within a selected 
 ```python
 def load_more(flags=None):
     flags = flags or []
-    validate_load_more_flags(flags)
-    reset_last_load_more_metrics()
+    _validate_load_more_flags(flags)
+    _reset_last_load_more_metrics()
 
     attempted_document_keys = set()
     start_time = monotonic_now()
@@ -77,34 +77,34 @@ def load_more(flags=None):
     while True:
         found_new_eligible_location = False
 
-        for table_entry in iter_table_entries_in_requested_scope(flags):
-            document_key = document_key_for(table_entry)
+        for table_entry in _iter_table_entries_in_requested_scope(flags):
+            document_key = _get_key(table_entry)
             if document_key in attempted_document_keys:
                 continue
-            if not is_table_entry_eligible_to_load(table_entry, flags):
+            if not _is_table_entry_eligible_to_load(table_entry, flags):
                 continue
 
             found_new_eligible_location = True
-            if has_reached_load_more_limit(attempted_count, start_time):
+            if _has_reached_load_more_limit(attempted_count, start_time):
                 g["load-more-complete"] = False
-                return load_more_info()
+                return _load_info()
 
             attempted_document_keys.add(document_key)
             attempted_count += 1
-            attempt_one_table_entry_and_record_metrics(table_entry)
+            _attempt_one_table_entry_and_record_metrics(table_entry)
 
         if "repeat" not in flags:
             g["load-more-complete"] = True
-            return load_more_info()
+            return _load_info()
 
         # Start another ordered pass. Successful imports may have appended
         # locations to `table`; attempted keys keep failures from looping.
         if not found_new_eligible_location:
             g["load-more-complete"] = True
-            return load_more_info()
+            return _load_info()
 
 
-def iter_table_entries_in_requested_scope(flags):
+def _iter_table_entries_in_requested_scope(flags):
     if "all" in flags:
         # Snapshot this pass.  A subsequent `repeat` pass sees table locations
         # appended by imports without mutating a collection being iterated.
@@ -113,13 +113,13 @@ def iter_table_entries_in_requested_scope(flags):
                 yield table_entry
         return
 
-    selected_entity = require_selected_entity()
+    selected_entity = _get_selected()
     for table_entry in list(table.get(selected_entity, [])):
         yield table_entry
 
 
-def is_table_entry_eligible_to_load(table_entry, flags):
-    document_key = document_key_for(table_entry)
+def _is_table_entry_eligible_to_load(table_entry, flags):
+    document_key = _get_key(table_entry)
     record = resources.get(document_key)
     if record is None:
         return True
@@ -130,7 +130,7 @@ def is_table_entry_eligible_to_load(table_entry, flags):
     return False  # A LOADED resource is already represented in the network.
 
 
-def has_reached_load_more_limit(attempted_count, start_time):
+def _has_reached_load_more_limit(attempted_count, start_time):
     max_files = g["load-more-max-files"]
     if max_files is not None and attempted_count >= max_files:
         return True
@@ -142,7 +142,7 @@ def has_reached_load_more_limit(attempted_count, start_time):
     return False
 
 
-def attempt_one_table_entry_and_record_metrics(table_entry):
+def _attempt_one_table_entry_and_record_metrics(table_entry):
     try:
         if table_entry["type"] == "file":
             import_file(table_entry["path"])

@@ -77,7 +77,7 @@ g = {
 }
 
 
-def reset_runtime():
+def _reset_network_runtime():
     """Clear all network registers together."""
     aspects.clear()
     sources.clear()
@@ -108,7 +108,7 @@ def reset_runtime():
     return g
 
 
-def canonical_path(p, flags=None):
+def _canonical_path(p, flags=None):
     flags = flags or []
     candidate = Path(p)
     if "new" in flags:
@@ -117,7 +117,7 @@ def canonical_path(p, flags=None):
 
 
 def target_file(p):
-    g["target-file"] = canonical_path(p, ["new"])
+    g["target-file"] = _canonical_path(p, ["new"])
     return g["target-file"]
 
 
@@ -133,48 +133,48 @@ def known_entities():
 
 
 def known_aspects():
-    return list(aspects[_require_selected_entity()].keys())
+    return list(aspects[_get_selected()].keys())
 
 
 def get_aspect(a_id):
-    selected_entity = _require_selected_entity()
+    selected_entity = _get_selected()
     if a_id not in aspects[selected_entity]:
         raise UnknownAspectError(selected_entity, a_id)
     return deepcopy(aspects[selected_entity][a_id])
 
 
 def import_file(p):
-    filepath = canonical_path(p)
+    filepath = _canonical_path(p)
     source = {"type": "file", "path": str(filepath)}
-    return _load_and_commit_one_resource(source, str(filepath))
+    return _load_resource(source, str(filepath))
 
 
 def import_url(url):
     source = {"type": "url", "url": url}
-    return _load_and_commit_one_resource(source, url)
+    return _load_resource(source, url)
 
 
 def create_entity(flags=None):
     flags = flags or []
-    owner = _require_target_file_and_prepare_empty_document_if_needed()
+    owner = _prepare_target()
     new_entity_id = str(uuid.uuid4())
     resources[owner]["data"]["entities"][new_entity_id] = {}
     aspects[new_entity_id] = {}
     sources[new_entity_id] = {}
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
     if "select" in flags:
         select_entity(new_entity_id)
     return new_entity_id
 
 
 def set_aspect(a_id, data):
-    selected_entity = _require_selected_entity()
+    selected_entity = _get_selected()
     _require_entity_id(a_id, "aspect identifier")
-    _require_json_compatible(data)
+    _require_json(data)
     owner = sources[selected_entity].get(a_id)
     if owner is None:
-        owner = _require_target_file_and_prepare_empty_document_if_needed()
-    _require_writable_file_resource(owner)
+        owner = _prepare_target()
+    _check_writable(owner)
     entity = resources[owner]["data"]["entities"].setdefault(selected_entity, {})
     entity.pop("tombstone", None)
     tombstones = entity.get("tombstones")
@@ -185,29 +185,29 @@ def set_aspect(a_id, data):
     entity[a_id] = deepcopy(data)
     aspects[selected_entity][a_id] = deepcopy(data)
     sources[selected_entity][a_id] = owner
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
 
 
 def delete_aspect(a_id):
-    selected_entity = _require_selected_entity()
+    selected_entity = _get_selected()
     if a_id not in aspects[selected_entity]:
         raise UnknownAspectError(selected_entity, a_id)
     owner = sources[selected_entity][a_id]
-    _require_writable_file_resource(owner)
+    _check_writable(owner)
     resources[owner]["data"]["entities"][selected_entity].pop(a_id, None)
     del aspects[selected_entity][a_id]
     del sources[selected_entity][a_id]
-    mark_file_dirty(owner)
+    _mark_dirty(owner)
 
 
-def mark_file_dirty(canonical_filepath):
+def _mark_dirty(canonical_filepath):
     filepath = str(canonical_filepath)
     resources[filepath]["dirty"] = True
     dirty_filepaths.add(filepath)
 
 
 def save_file(p):
-    filepath = str(canonical_path(p, ["new"]))
+    filepath = str(_canonical_path(p, ["new"]))
     record = resources.get(filepath)
     if record is None or not record["dirty"]:
         return False
@@ -237,7 +237,7 @@ def load_more(flags=None):
     while True:
         found_new_eligible_location = False
         for table_entry in _iter_table_entries_in_requested_scope(flags):
-            document_key = _document_key_for(table_entry)
+            document_key = _get_key(table_entry)
             if document_key in attempted_document_keys:
                 continue
             if not _is_table_entry_eligible_to_load(table_entry, flags):
@@ -245,17 +245,17 @@ def load_more(flags=None):
             found_new_eligible_location = True
             if _has_reached_load_more_limit(attempted_count, start_time):
                 g["load-more-complete"] = False
-                return _load_more_info()
+                return _load_info()
             attempted_document_keys.add(document_key)
             attempted_count += 1
             g["load-more-attempted"] += 1
             _attempt_one_table_entry_and_record_metrics(table_entry)
         if "repeat" not in flags or not found_new_eligible_location:
             g["load-more-complete"] = True
-            return _load_more_info()
+            return _load_info()
 
 
-def _load_and_commit_one_resource(source, document_key):
+def _load_resource(source, document_key):
     staged_record = {
         "source": deepcopy(source), "data": None, "dirty": False,
         "writable": source["type"] == "file", "load_attempted": _now(),
@@ -267,17 +267,17 @@ def _load_and_commit_one_resource(source, document_key):
     except ResourceReadOrValidationError as error:
         staged_record["load_result"] = "FAILED"
         staged_record["load-error-info"] = error.info
-        _record_unsuccessful_load(document_key, staged_record)
+        _record_result(document_key, staged_record)
         g["last-error"] = error.info
         raise
-    if _any_entity_aspect_pair_is_already_loaded(staged_pairs):
+    if _has_entity_aspect_pair_already_loaded(staged_pairs):
         staged_record["load_result"] = "REJECTED"
-        _record_unsuccessful_load(document_key, staged_record)
-        _increment_import_metric(source, "rejected")
+        _record_result(document_key, staged_record)
+        _increment_metric(source, "rejected")
         raise RedefinedEntityAspectError(document_key)
     staged_record["load_result"] = "LOADED"
     _commit_entire_validated_document(staged_pairs, document_key, staged_record)
-    _increment_import_metric(source, "loaded")
+    _increment_metric(source, "loaded")
     info = {"document-key": document_key, "entity-aspects": len(staged_pairs)}
     g["last-import-info"] = info
     return info
@@ -297,7 +297,7 @@ def _read_and_parse_transport_document(source):
 
 def _validate_and_normalize_document(document):
     try:
-        _require_json_compatible(document)
+        _require_json(document)
         if not isinstance(document, dict):
             raise ValueError("M1 transport must be a JSON object.")
         header = document.get("m1")
@@ -308,11 +308,11 @@ def _validate_and_normalize_document(document):
             header["series_id"] = _normalize_uuid(header["series_id"], "m1.series_id")
         if header.get("version") != "3.0":
             raise ValueError("M1 transport version must be '3.0'.")
-        _require_timestamp(header.get("timestamp"), "m1.timestamp")
+        _require_valid_timestamp(header.get("timestamp"), "m1.timestamp")
         entities = document.get("entities", {})
         if not isinstance(entities, dict):
             raise ValueError("entities must be a JSON object.")
-        document["entities"] = _normalize_entities(entities)
+        document["entities"] = _normalize_all_document_entities(entities)
         if "table" in document and not isinstance(document["table"], dict):
             raise ValueError("table must be a JSON object.")
     except (TypeError, ValueError) as error:
@@ -325,10 +325,10 @@ def _validate_and_normalize_document(document):
     ]
 
 
-def _normalize_entities(entities):
+def _normalize_all_document_entities(entities):
     normalized = {}
     for entity_id, entity in entities.items():
-        entity_id = _normalize_entity_id(entity_id, "entity identifier")
+        entity_id = _normalize_id(entity_id, "entity identifier")
         if entity_id in normalized:
             raise ValueError("Entity identifiers collide after UUID normalization.")
         if not isinstance(entity, dict):
@@ -348,7 +348,7 @@ def _normalize_entity_contribution(entity):
     for aspect_id, data in entity.items():
         if aspect_id in ("tombstone", "tombstones"):
             continue
-        normalized_id = _normalize_entity_id(aspect_id, "aspect identifier")
+        normalized_id = _normalize_id(aspect_id, "aspect identifier")
         if normalized_id in normalized:
             raise ValueError("Aspect identifiers collide after UUID normalization.")
         normalized[normalized_id] = data
@@ -358,7 +358,7 @@ def _normalize_entity_contribution(entity):
         tombstones = entity["tombstones"]
         if not isinstance(tombstones, list):
             raise ValueError("Aspect tombstones must be an array.")
-        normalized_tombstones = [_normalize_entity_id(item, "aspect tombstone") for item in tombstones]
+        normalized_tombstones = [_normalize_id(item, "aspect tombstone") for item in tombstones]
         if set(normalized) & set(normalized_tombstones):
             raise ValueError("An aspect cannot be contributed and tombstoned together.")
         normalized["tombstones"] = normalized_tombstones
@@ -367,7 +367,7 @@ def _normalize_entity_contribution(entity):
     return normalized
 
 
-def _any_entity_aspect_pair_is_already_loaded(staged_pairs):
+def _has_entity_aspect_pair_already_loaded(staged_pairs):
     return any(aspect_id in aspects.get(entity_id, {}) for entity_id, aspect_id, _data in staged_pairs)
 
 
@@ -383,7 +383,7 @@ def _commit_entire_validated_document(staged_pairs, document_key, staged_record)
         table.setdefault(entity_id, []).extend(deepcopy(entries))
 
 
-def _require_target_file_and_prepare_empty_document_if_needed():
+def _prepare_target():
     target = g["target-file"]
     if target is None:
         raise NoTargetFileError("No target file selected.")
@@ -398,24 +398,24 @@ def _require_target_file_and_prepare_empty_document_if_needed():
     return owner
 
 
-def _require_selected_entity():
+def _get_selected():
     selected_entity = g["selected-entity"]
     if selected_entity is None:
         raise NoSelectedEntityError("No entity selected.")
     return selected_entity
 
 
-def _require_writable_file_resource(owner):
+def _check_writable(owner):
     if not resources[owner]["writable"]:
         raise UnwritableResourceError(owner)
 
 
-def _record_unsuccessful_load(document_key, staged_record):
+def _record_result(document_key, staged_record):
     if resources.get(document_key, {}).get("load_result") != "LOADED":
         resources[document_key] = staged_record
 
 
-def _increment_import_metric(source, outcome):
+def _increment_metric(source, outcome):
     kind = "files" if source["type"] == "file" else "urls"
     g[f"{kind}-{outcome}"] += 1
 
@@ -444,18 +444,18 @@ def _iter_table_entries_in_requested_scope(flags):
         for _entity_id, entries in list(table.items()):
             yield from list(entries)
         return
-    selected_entity = _require_selected_entity()
+    selected_entity = _get_selected()
     yield from list(table.get(selected_entity, []))
 
 
-def _document_key_for(table_entry):
+def _get_key(table_entry):
     if table_entry["type"] == "file":
-        return str(canonical_path(table_entry["path"]))
+        return str(_canonical_path(table_entry["path"]))
     return table_entry["url"]
 
 
 def _is_table_entry_eligible_to_load(table_entry, flags):
-    record = resources.get(_document_key_for(table_entry))
+    record = resources.get(_get_key(table_entry))
     if record is None:
         return True
     if record["load_result"] == "FAILED":
@@ -488,7 +488,7 @@ def _attempt_one_table_entry_and_record_metrics(table_entry):
         g[f"load-more-{kind}-loaded"] += 1
 
 
-def _load_more_info():
+def _load_info():
     return {
         "complete": g["load-more-complete"],
         "attempted": g["load-more-attempted"],
@@ -509,7 +509,7 @@ def _normalize_uuid(value, label):
     return normalized
 
 
-def _normalize_entity_id(value, label):
+def _normalize_id(value, label):
     if not isinstance(value, str):
         raise ValueError(f"{label} must be a UUID or Tag URI string.")
     if value.startswith("tag:") and len(value) > 4:
@@ -518,10 +518,10 @@ def _normalize_entity_id(value, label):
 
 
 def _require_entity_id(value, label):
-    _normalize_entity_id(value, label)
+    _normalize_id(value, label)
 
 
-def _require_timestamp(value, label):
+def _require_valid_timestamp(value, label):
     if not isinstance(value, str):
         raise ValueError(f"{label} must be an ISO 8601 timestamp string.")
     try:
@@ -530,7 +530,7 @@ def _require_timestamp(value, label):
         raise ValueError(f"{label} must be an ISO 8601 timestamp string.") from error
 
 
-def _require_json_compatible(value):
+def _require_json(value):
     try:
         json.dumps(value, allow_nan=False)
     except (TypeError, ValueError) as error:
@@ -581,3 +581,8 @@ def _atomically_write_json(filepath, document):
 
 def _now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def reset_runtime():
+    """Clear the current network through its public command."""
+    return _reset_network_runtime()

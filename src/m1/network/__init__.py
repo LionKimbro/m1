@@ -10,7 +10,6 @@ from .runtime import ResourceReadOrValidationError
 from .runtime import UnknownAspectError
 from .runtime import UnknownEntityError
 from .runtime import aspects
-from .runtime import canonical_path
 from .runtime import create_entity
 from .runtime import delete_aspect
 from .runtime import dirty_filepaths
@@ -21,7 +20,6 @@ from .runtime import import_url
 from .runtime import known_aspects
 from .runtime import known_entities
 from .runtime import load_more
-from .runtime import mark_file_dirty
 from .runtime import reset_runtime
 from .runtime import resources
 from .runtime import save_file

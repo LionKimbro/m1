@@ -130,7 +130,7 @@ NOTE-3:
 
 
 internal functions:
-  mark_file_dirty(canonical_filepath)):
+  _mark_dirty(canonical_filepath)):
       resources[canonical_filepath]["dirty"] = True
       dirty_filepaths.add(canonical_filepath)
 

@@ -60,10 +60,10 @@ description: Embeds current known locations only for entities mentioned by the d
 ## PSEUDOCODE
 
 ```python
-def refresh_document_table_before_save(document):
+def _refresh_document_table_before_save(document):
     covered_entity_ids = set()
 
-    for e_id, a_id, data in iter_aspect_definitions_from_document(document):
+    for e_id, a_id, data in _iter_aspect_definitions_from_document(document):
         covered_entity_ids.add(e_id)
         if a_id == LINK_ASPECT:
             link_data = data
@@ -73,14 +73,14 @@ def refresh_document_table_before_save(document):
     projected_table = {}
     for e_id in covered_entity_ids:
         if e_id in table and table[e_id]:
-            projected_table[e_id] = copy_location_entries(table[e_id])
+            projected_table[e_id] = _copy_location_entries(table[e_id])
 
-    replace_document_table(document, projected_table)
+    _replace_document_table(document, projected_table)
 
 
-def copy_location_entries(entries):
+def _copy_location_entries(entries):
     # Later changes to the runtime table must not mutate a document record.
-    return deep_json_copy(entries)
+    return _deep_json_copy(entries)
 ```
 
 ## NOTES
