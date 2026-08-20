@@ -11,28 +11,36 @@ import m1
 
 
 ROOT = "ROOT"
-FILTER = "FILTER"
+FILTER_TAGS = "FILTER_TAGS"
+FILTER_TITLE = "FILTER_TITLE"
+FILTER_NAME = "FILTER_NAME"
 ENTITY = "ENTITY"
 ASPECT = "ASPECT"
 STATUS = "STATUS"
 ENTITY_ROWS = "ENTITY_ROWS"
 ASPECT_ROWS = "ASPECT_ROWS"
 INCLUDE_LINKS = "INCLUDE_LINKS"
+MISTAGGED_COMPAT = "MISTAGGED_COMPAT"
 
 kBASIC = "tag:m1lattice.net,2026:aspect/basic"
 kLINK = "tag:m1lattice.net,2026:aspect/link"
+kMISTAGGED_BASIC = "tag:m1lattice.net,2026/aspect/basic"
+kMISTAGGED_LINK = "tag:m1lattice.net,2026/aspect/link"
 kUUID_RE = re.compile(r"\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b")
 
 
 g = {
     ROOT: None,
-    FILTER: "",
+    FILTER_TAGS: "",
+    FILTER_TITLE: "",
+    FILTER_NAME: "",
     ENTITY: None,
     ASPECT: None,
     STATUS: "Ready.",
     ENTITY_ROWS: [],
     ASPECT_ROWS: [],
     INCLUDE_LINKS: True,
+    MISTAGGED_COMPAT: False,
 }
 
 widgets = {}
@@ -74,6 +82,8 @@ def build_ui():
     top = ttk.Frame(g[ROOT], padding=10)
     top.grid(row=0, column=0, sticky="ew")
     top.columnconfigure(4, weight=1)
+    top.columnconfigure(6, weight=1)
+    top.columnconfigure(8, weight=1)
 
     widgets["import_files"] = ttk.Button(top, text="Import Files", command=handle_when_user_clicks_import_files_button)
     widgets["import_files"].grid(row=0, column=0, padx=(0, 8), pady=(0, 8), sticky="w")
@@ -84,11 +94,23 @@ def build_ui():
     widgets["reset"] = ttk.Button(top, text="Reset Claimspace", command=handle_when_user_clicks_reset_button)
     widgets["reset"].grid(row=0, column=2, padx=(0, 12), pady=(0, 8), sticky="w")
 
-    ttk.Label(top, text="Filter entities by tags").grid(row=0, column=3, padx=(0, 8), pady=(0, 8), sticky="e")
-    widgets["filter_var"] = tkinter.StringVar()
-    widgets["filter_var"].trace_add("write", handle_when_filter_text_changes)
-    widgets["filter_entry"] = ttk.Entry(top, textvariable=widgets["filter_var"])
-    widgets["filter_entry"].grid(row=0, column=4, padx=(0, 8), pady=(0, 8), sticky="ew")
+    ttk.Label(top, text="Tags contain").grid(row=0, column=3, padx=(0, 6), pady=(0, 8), sticky="e")
+    widgets["filter_tags_var"] = tkinter.StringVar()
+    widgets["filter_tags_var"].trace_add("write", handle_when_filter_text_changes)
+    widgets["filter_tags_entry"] = ttk.Entry(top, textvariable=widgets["filter_tags_var"])
+    widgets["filter_tags_entry"].grid(row=0, column=4, padx=(0, 8), pady=(0, 8), sticky="ew")
+
+    ttk.Label(top, text="Title contains").grid(row=0, column=5, padx=(0, 6), pady=(0, 8), sticky="e")
+    widgets["filter_title_var"] = tkinter.StringVar()
+    widgets["filter_title_var"].trace_add("write", handle_when_filter_text_changes)
+    widgets["filter_title_entry"] = ttk.Entry(top, textvariable=widgets["filter_title_var"])
+    widgets["filter_title_entry"].grid(row=0, column=6, padx=(0, 8), pady=(0, 8), sticky="ew")
+
+    ttk.Label(top, text="Name contains").grid(row=0, column=7, padx=(0, 6), pady=(0, 8), sticky="e")
+    widgets["filter_name_var"] = tkinter.StringVar()
+    widgets["filter_name_var"].trace_add("write", handle_when_filter_text_changes)
+    widgets["filter_name_entry"] = ttk.Entry(top, textvariable=widgets["filter_name_var"])
+    widgets["filter_name_entry"].grid(row=0, column=8, pady=(0, 8), sticky="ew")
 
     body = ttk.Panedwindow(g[ROOT], orient="horizontal")
     body.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
@@ -102,12 +124,20 @@ def build_ui():
     widgets["include_links_var"].trace_add("write", handle_when_include_links_changes)
     widgets["include_links"] = ttk.Checkbutton(left, text="Include Links", variable=widgets["include_links_var"])
     widgets["include_links"].grid(row=0, column=1, sticky="e", padx=(8, 0))
+    widgets["mistagged_compat_var"] = tkinter.BooleanVar(value=False)
+    widgets["mistagged_compat_var"].trace_add("write", handle_when_mistagged_compat_changes)
+    widgets["mistagged_compat"] = ttk.Checkbutton(
+        left,
+        text="Mis-tagged compat mode",
+        variable=widgets["mistagged_compat_var"],
+    )
+    widgets["mistagged_compat"].grid(row=0, column=2, sticky="e", padx=(8, 0))
     widgets["entity_list"] = tkinter.Listbox(left, exportselection=False)
-    widgets["entity_list"].grid(row=1, column=0, columnspan=2, sticky="nsew")
+    widgets["entity_list"].grid(row=1, column=0, columnspan=3, sticky="nsew")
     widgets["entity_list"].bind("<<ListboxSelect>>", handle_when_user_selects_entity)
     ttk.Label(left, text="Links").grid(row=2, column=0, sticky="w", pady=(10, 0))
     widgets["links_text"] = tkinter.Text(left, wrap="word", height=14)
-    widgets["links_text"].grid(row=3, column=0, columnspan=2, sticky="nsew")
+    widgets["links_text"].grid(row=3, column=0, columnspan=3, sticky="nsew")
     body.add(left, weight=4)
 
     mid = ttk.Frame(body, padding=8)
@@ -179,13 +209,20 @@ def handle_when_user_clicks_reset_button():
 
 
 def handle_when_filter_text_changes(*_args):
-    g[FILTER] = widgets["filter_var"].get().strip()
+    g[FILTER_TAGS] = widgets["filter_tags_var"].get().strip()
+    g[FILTER_TITLE] = widgets["filter_title_var"].get().strip()
+    g[FILTER_NAME] = widgets["filter_name_var"].get().strip()
     refresh_entity_list()
     refresh_links_text()
 
 
 def handle_when_include_links_changes(*_args):
     g[INCLUDE_LINKS] = bool(widgets["include_links_var"].get())
+    refresh_entity_list()
+
+
+def handle_when_mistagged_compat_changes(*_args):
+    g[MISTAGGED_COMPAT] = bool(widgets["mistagged_compat_var"].get())
     refresh_entity_list()
 
 
@@ -311,7 +348,7 @@ def build_link_rows():
     rows = []
     here = get_entity_label(g[ENTITY])
     for link_id in sorted(m1.all_entities(), key=get_entity_label):
-        claim = m1.get_latest_aspect(link_id, kLINK)
+        claim = get_link_aspect(link_id)
         if claim is None:
             continue
         D = claim["aspect"]
@@ -351,12 +388,17 @@ def get_filtered_entities():
         if not g[INCLUDE_LINKS] and has_link_aspect(entity_id):
             continue
         label = get_entity_label(entity_id)
-        if not g[FILTER]:
-            rows.append({"entity_id": entity_id, "label": label})
+        tags = " ".join(get_basic_tags(entity_id)).casefold()
+        basic_aspects = get_basic_aspects(entity_id)
+        titles = [str(claim["aspect"].get("title", "")).casefold() for claim in basic_aspects]
+        names = [str(claim["aspect"].get("name", "")).casefold() for claim in basic_aspects]
+        if g[FILTER_TAGS].casefold() not in tags:
             continue
-        tags = " ".join(get_basic_tags(entity_id)).lower()
-        if g[FILTER].lower() in tags:
-            rows.append({"entity_id": entity_id, "label": label})
+        if g[FILTER_TITLE] and not any(g[FILTER_TITLE].casefold() in title for title in titles):
+            continue
+        if g[FILTER_NAME] and not any(g[FILTER_NAME].casefold() in name for name in names):
+            continue
+        rows.append({"entity_id": entity_id, "label": label})
     return rows
 
 
@@ -365,24 +407,46 @@ def get_basic_aspect(entity_id):
 
 
 def has_link_aspect(entity_id):
-    return kLINK in m1.all_aspects(entity_id)
+    return get_link_aspect(entity_id) is not None
+
+
+def get_link_aspect(entity_id):
+    aspect_ids = [kLINK]
+    if g[MISTAGGED_COMPAT]:
+        aspect_ids.append(kMISTAGGED_LINK)
+    for aspect_id in aspect_ids:
+        claim = m1.get_latest_aspect(entity_id, aspect_id)
+        if claim is not None and isinstance(claim["aspect"], dict):
+            return claim
+    return None
+
+
+def get_basic_aspects(entity_id):
+    aspect_ids = [kBASIC]
+    if g[MISTAGGED_COMPAT]:
+        aspect_ids.append(kMISTAGGED_BASIC)
+    return [
+        claim
+        for aspect_id in aspect_ids
+        if (claim := m1.get_latest_aspect(entity_id, aspect_id)) is not None
+        and isinstance(claim["aspect"], dict)
+    ]
 
 
 def get_basic_tags(entity_id):
-    claim = get_basic_aspect(entity_id)
-    if claim is None:
-        return []
-    tags = claim["aspect"].get("tags", [])
-    if not isinstance(tags, list):
-        return []
-    return [str(tag) for tag in tags]
+    tags = []
+    for claim in get_basic_aspects(entity_id):
+        claim_tags = claim["aspect"].get("tags", [])
+        if isinstance(claim_tags, list):
+            tags.extend(str(tag) for tag in claim_tags)
+    return tags
 
 
 def get_entity_label(entity_id):
     if not m1.has_entity(entity_id):
         return entity_id
     claim = get_basic_aspect(entity_id)
-    if claim is None:
+    if claim is None or not isinstance(claim["aspect"], dict):
         return entity_id
     if claim["aspect"].get("title"):
         return claim["aspect"]["title"]
@@ -575,8 +639,12 @@ def handle_when_mouse_leaves_clickable_reference(event):
 def navigate_to_entity(entity_id):
     if not m1.has_entity(entity_id):
         return
-    g[FILTER] = ""
-    widgets["filter_var"].set("")
+    g[FILTER_TAGS] = ""
+    g[FILTER_TITLE] = ""
+    g[FILTER_NAME] = ""
+    widgets["filter_tags_var"].set("")
+    widgets["filter_title_var"].set("")
+    widgets["filter_name_var"].set("")
     g[ENTITY] = entity_id
     g[ASPECT] = None
     refresh_entity_list()

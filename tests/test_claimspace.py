@@ -1,5 +1,7 @@
 import json
 
+import m1.runtime as runtime
+
 import m1
 
 
@@ -52,6 +54,29 @@ def test_overlay_writes_immediately_update_selected_value():
 
     assert m1.get_aspect("tag:m1lattice.net,2026:aspect/basic")["title"] == "Overlay Title"
     assert m1.source_aspect("tag:m1lattice.net,2026:aspect/basic") is None
+
+
+def test_list_entities_collects_entity_ids_once():
+    m1.reset()
+    for number in range(20):
+        m1.target_entity(f"entity-{number}")
+        m1.set_aspect("basic", {"number": number})
+
+    original_collect_entities = runtime._collect_entities
+    calls = 0
+
+    def counted_collect_entities():
+        nonlocal calls
+        calls += 1
+        return original_collect_entities()
+
+    runtime._collect_entities = counted_collect_entities
+    try:
+        assert m1.list_entities() == sorted(f"entity-{number}" for number in range(20))
+    finally:
+        runtime._collect_entities = original_collect_entities
+
+    assert calls == 1
 
 
 def test_none_tombstone_covers_lower_priority(tmp_path):

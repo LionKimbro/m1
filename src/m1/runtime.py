@@ -191,11 +191,13 @@ def has_aspect(aspect_id, flags=""):
 
 
 def list_entities():
-    return sorted(entity_id for entity_id in _collect_entities() if _entity_is_visible(entity_id))
+    entity_ids = _collect_entities()
+    return sorted(entity_id for entity_id in entity_ids if _entity_is_visible(entity_id, entity_ids))
 
 
 def has_entity(entity_id):
-    return entity_id in _collect_entities() and _entity_is_visible(entity_id)
+    entity_ids = _collect_entities()
+    return entity_id in entity_ids and _entity_is_visible(entity_id, entity_ids)
 
 
 def list_aspects(flags=""):
@@ -510,11 +512,12 @@ def _build_overlay_doc(base, include_table):
 
 def _build_snapshot_doc(base, include_table):
     entities = {}
-    for entity_id in sorted(_collect_entities()):
+    entity_ids = _collect_entities()
+    for entity_id in sorted(entity_ids):
         old = g["target_entity"]
         g["target_entity"] = entity_id
         try:
-            visible_entity = _entity_is_visible(entity_id)
+            visible_entity = _entity_is_visible(entity_id, entity_ids)
             if visible_entity:
                 aspect_ids = [
                     aspect_id
@@ -693,10 +696,10 @@ def _layer_index(source_id):
     return 1 + g["priority"].index(source_id)
 
 
-def _entity_is_visible(entity_id):
+def _entity_is_visible(entity_id, known_entity_ids=None):
     tombstone_found, tombstone_value, tombstone_source = _resolve_tombstone(entity_id)
     if not tombstone_found or not _is_active_entity_tombstone(tombstone_value):
-        return entity_id in _collect_entities()
+        return entity_id in (known_entity_ids if known_entity_ids is not None else _collect_entities())
     cutoff = _layer_index(tombstone_source)
     for _source_id, entities in _layers()[:cutoff]:
         if entity_id in entities:
