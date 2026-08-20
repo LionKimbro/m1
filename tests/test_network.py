@@ -103,3 +103,36 @@ def test_load_more_obeys_limits_and_repeat_discovers_imported_table_entries(tmp_
     assert repeated["complete"] is True
     assert repeated["files"]["loaded"] == 1
     assert grandchild_entity in network.known_entities()
+
+
+def test_save_projects_current_locations_for_represented_link_endpoints(tmp_path):
+    network.reset_runtime()
+    filepath = tmp_path / "links.m1"
+    link_entity = "88888888-8888-4888-8888-888888888888"
+    from_entity = "99999999-9999-4999-8999-999999999999"
+    to_entity = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+    unrelated_entity = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
+    empty_entity = "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
+    document = _document(link_entity, network.LINK_ASPECT, {"from": from_entity, "to": to_entity})
+    document["entities"][empty_entity] = {}
+    document["table"] = {
+        link_entity: [{"type": "file", "path": "C:/known/link.m1"}],
+        from_entity: [{"type": "url", "url": "https://example.net/from.m1"}],
+        to_entity: [{"type": "url", "url": "https://example.net/to.m1"}],
+        unrelated_entity: [{"type": "url", "url": "https://example.net/unrelated.m1"}],
+        empty_entity: [{"type": "url", "url": "https://example.net/empty.m1"}],
+    }
+    filepath.write_text(json.dumps(document), encoding="utf-8")
+
+    network.import_file(filepath)
+    network.target_file(filepath)
+    network.select_entity(link_entity)
+    network.set_aspect(network.BASIC_ASPECT, {"title": "A link"})
+    assert network.save_file(filepath)
+
+    saved = json.loads(filepath.read_text(encoding="utf-8"))
+    assert saved["table"] == {
+        link_entity: [{"type": "file", "path": "C:/known/link.m1"}],
+        from_entity: [{"type": "url", "url": "https://example.net/from.m1"}],
+        to_entity: [{"type": "url", "url": "https://example.net/to.m1"}],
+    }

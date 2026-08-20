@@ -21,6 +21,7 @@ description: Changes the owning in-memory document and its network indexes toget
 ## CALLS
 
 - `canonical_path()` for save targets.
+- `refresh_document_table_before_save()` to embed the current local table view.
 - UUID generation for new entities.
 - JSON serialization and atomic filesystem replacement.
 - `mark_file_dirty()`.
@@ -46,6 +47,8 @@ description: Changes the owning in-memory document and its network indexes toget
 ## DOES NOT OWN
 
 - Importing a resource or resolving table locations.
+- Constructing the save-time table projection; that cross-cutting policy belongs
+  to the table-projection module.
 - Merging edits with a changed external file.
 - Writing URL resources.
 - The semantic meaning or schema of aspect data.
@@ -111,6 +114,7 @@ def save_file(p):
     if record is None or not record["dirty"]:
         return False
 
+    refresh_document_table_before_save(record["data"])
     atomically_write_json(filepath, record["data"])
     record["dirty"] = False
     dirty_filepaths.discard(str(filepath))

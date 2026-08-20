@@ -137,6 +137,15 @@ document's `series_id` is preserved.  A document that did not yet have a
 `series_id` receives a new UUID on its first save, and later saves preserve it.
 The dirty marker is cleared only after the atomic replacement succeeds.
 
+Immediately before serialization, saving replaces the document's `table` with
+a current local projection.  It includes known locations only for entities
+with aspect definitions in that document and, for each stored link aspect,
+its direct `from` and `to` endpoints.  An empty entity record does not cause a
+table entry.  The projection omits IDs without locations and does not traverse
+beyond those direct endpoints.  This is an advertisement of the runtime's
+current knowledge, not an authoritative table merge or location-selection
+policy.
+
 ## Loading more from table locations
 
 Imported documents may contribute table entries of these forms:

@@ -77,6 +77,14 @@ document-data format -- something like:
   }
   (you may adjust this)
 
+save-time table projection:
+  before a writable document is serialized, update its transport-document table
+  with this runtime's current known locations only for entities mentioned in
+  that document: entities having an aspect definition in the document, plus the
+  direct `from` and `to` endpoints named by its link aspect definitions. This
+  is a current knowledge advertisement, not an authoritative table merge or
+  resource-selection policy.
+
 
 NOTE-1:
 * filepaths should be canonicalized before use and storage:

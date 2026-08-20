@@ -539,11 +539,29 @@ def _require_json_compatible(value):
 
 def _make_document_for_next_emission(document):
     emitted = deepcopy(document)
+    _refresh_document_table_before_save(emitted)
     header = emitted["m1"]
     header["id"] = str(uuid.uuid4())
     header.setdefault("series_id", str(uuid.uuid4()))
     header["timestamp"] = _now()
     return emitted
+
+
+def _refresh_document_table_before_save(document):
+    covered_entity_ids = set()
+    for entity_id, entity in document.get("entities", {}).items():
+        for aspect_id, data in entity.items():
+            if aspect_id in ("tombstone", "tombstones"):
+                continue
+            covered_entity_ids.add(entity_id)
+            if aspect_id == LINK_ASPECT:
+                covered_entity_ids.add(data["from"])
+                covered_entity_ids.add(data["to"])
+    projected_table = {}
+    for entity_id in covered_entity_ids:
+        if entity_id in table and table[entity_id]:
+            projected_table[entity_id] = deepcopy(table[entity_id])
+    document["table"] = projected_table
 
 
 def _atomically_write_json(filepath, document):
