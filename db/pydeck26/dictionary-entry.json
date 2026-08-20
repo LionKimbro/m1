@@ -2,8 +2,20 @@
   "id": "m1",
   "identity": {
     "name": "m1",
-    "title": "M1",
-    "tags": [],
-    "hook": ""
+    "title": "M1 Lattice",
+    "tags": [
+      "m1",
+      "lattice",
+      "entity",
+      "entities",
+      "aspect",
+      "aspects",
+      "link",
+      "links",
+      "external",
+      "network",
+      "semantic"
+    ],
+    "hook": "it's like ECS, but for data -- entitites track persistent objects, and aspects attach chunks of data to said objects"
   }
 }

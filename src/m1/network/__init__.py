@@ -22,7 +22,7 @@ from .runtime import known_aspects
 from .runtime import known_entities
 from .runtime import load_more
 from .runtime import mark_file_dirty
-from .runtime import reset_network_runtime
+from .runtime import reset_runtime
 from .runtime import resources
 from .runtime import save_file
 from .runtime import save_files

@@ -18,7 +18,7 @@ def _document(entity_id, aspect_id, value, series_id=None):
 
 
 def test_import_is_atomic_and_rejects_existing_entity_aspect(tmp_path):
-    network.reset_network_runtime()
+    network.reset_runtime()
     first = tmp_path / "first.m1"
     second = tmp_path / "second.m1"
     entity_id = "22222222-2222-4222-8222-222222222222"
@@ -37,7 +37,7 @@ def test_import_is_atomic_and_rejects_existing_entity_aspect(tmp_path):
 
 
 def test_save_reemits_id_and_preserves_existing_series_id(tmp_path):
-    network.reset_network_runtime()
+    network.reset_runtime()
     filepath = tmp_path / "working.m1"
     entity_id = "33333333-3333-4333-8333-333333333333"
     series_id = "44444444-4444-4444-8444-444444444444"
@@ -56,7 +56,7 @@ def test_save_reemits_id_and_preserves_existing_series_id(tmp_path):
 
 
 def test_new_target_document_gets_series_id_and_reemits_id(tmp_path):
-    network.reset_network_runtime()
+    network.reset_runtime()
     filepath = tmp_path / "new.m1"
     network.target_file(filepath)
     entity_id = network.create_entity(["select"])
@@ -71,7 +71,7 @@ def test_new_target_document_gets_series_id_and_reemits_id(tmp_path):
 
 
 def test_load_more_obeys_limits_and_repeat_discovers_imported_table_entries(tmp_path):
-    network.reset_network_runtime()
+    network.reset_runtime()
     root = tmp_path / "root.m1"
     child = tmp_path / "child.m1"
     grandchild = tmp_path / "grandchild.m1"

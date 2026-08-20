@@ -1,1 +1,34 @@
-{"items": []}
+{
+  "items": [
+    {
+      "path": "docs/raw/",
+      "filename": "030__m1lattice-spec-core-v3.json",
+      "hook": "core definition of M1",
+      "kind": "file"
+    },
+    {
+      "path": "docs/",
+      "filename": "m1-lattice-llm-brief.md",
+      "hook": "AI-generated (but very good!) brief on the core system",
+      "kind": "file"
+    },
+    {
+      "path": "docs/raw/",
+      "filename": "031__m1lattice-spec-transport-v3.json",
+      "hook": "primary description of the transport file format",
+      "kind": "file"
+    },
+    {
+      "path": "docs/raw/",
+      "filename": "022__link-types.json",
+      "hook": "details link types and linking",
+      "kind": "file"
+    },
+    {
+      "path": "docs/",
+      "filename": "m1-network-api-documentation.md",
+      "hook": "m1.network package API (AI generated)",
+      "kind": "file"
+    }
+  ]
+}

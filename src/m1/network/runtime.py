@@ -77,7 +77,7 @@ g = {
 }
 
 
-def reset_network_runtime():
+def reset_runtime():
     """Clear all network registers together."""
     aspects.clear()
     sources.clear()
