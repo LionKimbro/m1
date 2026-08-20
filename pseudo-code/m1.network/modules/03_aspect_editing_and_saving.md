@@ -96,7 +96,7 @@ def create_entity(flags=None):
 
 def set_aspect(a_id, data):
     selected_entity = _get_selected()
-    _require_json_compatible_data(data)
+    _require_json(data)
 
     if a_id in aspects[selected_entity]:
         owner = sources[selected_entity][a_id]
