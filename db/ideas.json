@@ -1,0 +1,38 @@
+{
+  "items": [
+    {
+      "guid": "34fa3472-1c8d-42f0-a4f7-91a19e25b06d",
+      "title": "m1.network: Create Link",
+      "description": "Make support functionality for creating link objects:\n  make_link(<entity-from>, <entity-to>, flags=None)\nYou get back: the link object; if you pass flag [\"select\"], it also becomes the selected object.",
+      "status": "conceived",
+      "date-conceived": "2026-08-20",
+      "date-entered": "2026-08-20",
+      "notes": "",
+      "tags": [
+        "link",
+        "linking"
+      ],
+      "pinned": true
+    },
+    {
+      "guid": "e94baf99-ef2b-43fa-8e6c-a7de456037bb",
+      "title": "m1.network: basic_aspect(), link_aspect(), log_aspect() shortcuts",
+      "description": "basically wrapper around m1.get_aspect(m1.BASIC_ASPECT), and so on...",
+      "status": "conceived",
+      "date-conceived": "2026-08-20",
+      "date-entered": "2026-08-20",
+      "notes": "",
+      "tags": [
+        "shortcut",
+        "shortcuts",
+        "helper",
+        "public",
+        "function",
+        "functions",
+        "aspect",
+        "aspects"
+      ],
+      "pinned": true
+    }
+  ]
+}
