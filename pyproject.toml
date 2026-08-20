@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-m1-browser = "m1.browser:main"
+m1-browser = "m1.claimspace.browser:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

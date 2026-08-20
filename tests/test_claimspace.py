@@ -1,8 +1,9 @@
 import json
 
-import m1.runtime as runtime
+import importlib
 
-import m1
+runtime = importlib.import_module("m1.claimspace.runtime")
+m1 = importlib.import_module("m1.claimspace")
 
 
 def test_load_m1_and_targeted_access(tmp_path):
