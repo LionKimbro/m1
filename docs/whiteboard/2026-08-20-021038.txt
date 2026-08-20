@@ -1,0 +1,3 @@
+2026-08-20
+- conversations updated
+- added vertical scrollbar to conversations list, inspired by massive number of conversations here

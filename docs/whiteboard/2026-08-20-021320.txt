@@ -1,0 +1,8 @@
+2026-08-20 PLAN:
+  1. Isolate m1 and default m1 to m1.claimspace;  Create space for new work in m1.network
+  2. Program m1.network such that I can:
+* read files into memory that is sourced
+* write files that have changed
+* get an inventory of files that need to be updated (that are dirty)
+* when adding new information, specify (likely as another step) where that information shall be stored (on disk)
+* handle conflicts intelligently, with registers or queues filled with necessary information

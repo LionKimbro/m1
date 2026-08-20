@@ -1,0 +1,84 @@
+{
+  "items": [
+    {
+      "id": "68956b64-2497-4eca-b499-3d3c400cc488",
+      "date": "2026-04-01",
+      "title": "M1-CMD",
+      "url": "https://chatgpt.com/c/69cb6294-1cbc-83e8-9907-97b9e50d74b9",
+      "hook": "Project Tracking",
+      "description": ""
+    },
+    {
+      "id": "ffc13408-17c2-49c5-8482-d4beaa0b1e7f",
+      "date": "2026-04-01",
+      "title": "M1-DESIGN",
+      "url": "https://chatgpt.com/c/69c74905-fbd8-83e8-b50f-4fe1067dec4f",
+      "hook": "primary design thread",
+      "description": ""
+    },
+    {
+      "id": "25db6d9d-f8e7-4fdd-9d43-2ef3ce71f58d",
+      "date": "2026-04-01",
+      "title": "M1-DESIGN-2",
+      "url": "https://chatgpt.com/c/69e06d32-8c68-83e8-aae9-1f0c0e683fcb",
+      "hook": "the work continues, starting with Aliases",
+      "description": ""
+    },
+    {
+      "id": "b93aaf1e-d297-4024-a367-d7627222d3d9",
+      "date": "2026-04-01",
+      "title": "M1-FMT",
+      "url": "https://chatgpt.com/c/69c80ea8-d290-83e8-a4ee-29ad24e465e6",
+      "hook": "core format development",
+      "description": "the development of 002__spec.json,\nwhich includes the definition of Entity, Aspect, Link, and Table"
+    },
+    {
+      "id": "3bd586d5-60d3-4456-bc6e-00fe9dfcc5d0",
+      "date": "2026-04-01",
+      "title": "to-dos for M1",
+      "url": "https://chatgpt.com/c/69c404cf-2514-83e8-9c9a-362958fa8872",
+      "hook": "work on ZOO format code, adapting to M1",
+      "description": "Work on the ZOO format code, (adapting to M1,) and I realized that the transport spec (#021) was underspecified, and came up with a giant to-do list for M1, that I'm working through"
+    },
+    {
+      "id": "fcbeeeb2-f05c-435b-86b4-9bbef595dfab",
+      "date": "2026-04-01",
+      "title": "ZOO-M1",
+      "url": "https://chatgpt.com/c/69e18cc2-881c-83e8-a937-b8a7d7e12e98",
+      "hook": "about integrating M1 into Zoo",
+      "description": "aka \"Zoo part 2\""
+    },
+    {
+      "id": "62e20f6e-6a0a-40fb-8bc5-0f18962169af",
+      "date": "2026-04-13",
+      "title": "020-series document changes",
+      "url": "https://chatgpt.com/c/69dd27ae-97c4-83e8-a01c-065baa670ba2",
+      "hook": "",
+      "description": "apply 2026-04-13 changes\n  - in the 020-series of documents\n  - working on defining the transport spec, adding aliases too, ...\n  reason for departure: working to tighten up how we define JSON specs (objects, arrays, ...)\n    (note: does NOT appear to be soft-spec)"
+    },
+    {
+      "id": "5dd17695-494c-4365-8ab8-72d1b3cf88f0",
+      "date": "2026-04-13",
+      "title": "Soft Schema Discussion",
+      "url": "https://chatgpt.com/c/69dd2a48-1ce4-83e8-bcea-c7d248a12b34",
+      "hook": "led to the creation of soft-specs",
+      "description": ""
+    },
+    {
+      "id": "f1d9fae7-e458-4df9-9342-4f20853d0cee",
+      "date": "2026-04-15",
+      "title": "M1 Aliases Task",
+      "url": "https://chatgpt.com/c/69e06915-4690-83e8-b2f3-4eb5c5bcb30a",
+      "hook": "trying to add aliasing to M1",
+      "description": ""
+    },
+    {
+      "id": "2ccd3868-c1ca-4935-afbc-7f0e9018a7b4",
+      "date": "2026-08-20",
+      "title": "M1 Claimspace vs. Network",
+      "url": "https://chatgpt.com/c/6a86b9d4-1528-83e8-9780-75e73bfca494",
+      "hook": "making space for a \"network\" editing approach",
+      "description": ""
+    }
+  ]
+}
